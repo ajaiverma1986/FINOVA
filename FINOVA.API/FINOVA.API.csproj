@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Audit.NET.SqlServer" Version="32.3.1" />
+    <PackageReference Include="Audit.WebApi.Core" Version="32.3.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FINOVA.Commonlib\FINOVA.Commonlib.csproj" />
+    <ProjectReference Include="..\FINOVA.Configuration\FINOVA.Configuration.csproj" />
+    <ProjectReference Include="..\FINOVA.Logging\FINOVA.Logging.csproj" />
+    <ProjectReference Include="..\FINOVA.Provider\FINOVA.Provider.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\images\" />
+  </ItemGroup>
+
+</Project>

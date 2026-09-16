@@ -1,0 +1,17 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace FINOVA.Commonlib.Utility
+{
+    public class DropDownListValidator : ValidationAttribute
+    {
+        public override bool IsValid(object value)
+        {
+            return (Convert.ToInt32(value) > 0) ? true : false;
+        }
+    }
+}
