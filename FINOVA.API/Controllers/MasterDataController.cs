@@ -1,4 +1,4 @@
-﻿using FINOVA.API.Common;
+using FINOVA.API.Common;
 using FINOVA.API.Security;
 using FINOVA.DataModel.Masters;
 using FINOVA.DataModel.Shared;
@@ -1470,7 +1470,8 @@ public async Task<IActionResult> GetActiveKycTypes()
 // ============================================================
 [HttpGet("GetKycTypesByUserTypeID")]
 public async Task<IActionResult> GetKycTypesByUserTypeID(
-    int userTypeID)
+    int userTypeID,
+    int? companyTypeId = null)
 {
     SimpleResponse response = new SimpleResponse();
 
@@ -1485,9 +1486,9 @@ public async Task<IActionResult> GetKycTypesByUserTypeID(
         return Json(response);
     }
 
-    response = await _Provider.GetKycTypesByUserTypeID(
-        userTypeID,
-        CallerUser);
+    response = companyTypeId.HasValue
+        ? await _Provider.GetKycTypesByUserAndCompanyType(userTypeID, companyTypeId, CallerUser)
+        : await _Provider.GetKycTypesByUserTypeID(userTypeID, CallerUser);
 
     return Json(response);
 }

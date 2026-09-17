@@ -12,6 +12,7 @@ namespace FINOVA.Commonlib.Utility
         private static readonly byte[] Key = Encoding.UTF8.GetBytes("7F96I034A2515829"); // replace with your own secret key
         private static readonly byte[] IV = Encoding.UTF8.GetBytes("2468912340583923"); // replace with your own initial vector
 
+
         public static string Encrypt(string plainText)
         {
             Aes aesAlg = Aes.Create();

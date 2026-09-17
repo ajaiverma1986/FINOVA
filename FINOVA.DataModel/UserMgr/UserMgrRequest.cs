@@ -84,5 +84,146 @@ namespace FINOVA.DataModel.UserMgr
 
         public string? RemarkReason { get; set; }
     }
-   
+    public class CreateUserAddressRequest
+    {
+        public long UserMasterId { get; set; }
+        public int AddressTypeId { get; set; }
+        public string Pincode { get; set; }
+        public long PincodeDataId { get; set; }
+        public string Address1 { get; set; }
+        public string? Address2 { get; set; }
+        public string? Address3 { get; set; }
+        public int Status { get; set; } = 1;
+    }
+
+    public class UpdateUserAddressRequest
+    {
+        public long UserAddressID { get; set; }
+        public long UserMasterId { get; set; }
+        public int AddressTypeId { get; set; }
+        public string Pincode { get; set; }
+        public long PincodeDataId { get; set; }
+        public string Address1 { get; set; }
+        public string? Address2 { get; set; }
+        public string? Address3 { get; set; }
+        public int Status { get; set; }
+    }
+    public class CreateUserKycRequest
+    {
+        public long UserMasterId { get; set; }
+        public int KycID { get; set; }
+        public string? DocumentNo { get; set; }
+        public string? FileUrl { get; set; }
+        public string? MediaExtension { get; set; }
+        public string? MediaContentType { get; set; }
+        public string? RejectedReason { get; set; }
+        public int Status { get; set; } = 1;
+    }
+
+    public class UpdateUserKycRequest
+    {
+        public long UserKYCID { get; set; }
+        public long UserMasterId { get; set; }
+        public int KycID { get; set; }
+        public string? DocumentNo { get; set; }
+        public string? FileUrl { get; set; }
+        public string? MediaExtension { get; set; }
+        public string? MediaContentType { get; set; }
+        public string? RejectedReason { get; set; }
+        public int Status { get; set; }
+    }
+    public class CreateUserBankAccountRequest
+    {
+        public long UserMasterID { get; set; }
+        public long BankId { get; set; }
+        public string AccountName { get; set; }
+        public string AccountNo { get; set; }
+        public string Ifsccode { get; set; }
+        public string? BranchAddress { get; set; }
+        public string? Filename { get; set; }
+        public string? RejectedReason { get; set; }
+        public int Status { get; set; } = 1;
+    }
+
+    public class UpdateUserBankAccountRequest
+    {
+        public long OriginatorAccountID { get; set; }
+        public long UserMasterID { get; set; }
+        public long BankId { get; set; }
+        public string AccountName { get; set; }
+        public string AccountNo { get; set; }
+        public string Ifsccode { get; set; }
+        public string? BranchAddress { get; set; }
+        public string? Filename { get; set; }
+        public string? RejectedReason { get; set; }
+        public int Status { get; set; }
+    }
+    public class GetUserBankAccountResponse
+    {
+        public long OriginatorAccountID { get; set; }
+
+        public long UserMasterID { get; set; }
+
+        public long BankId { get; set; }
+        public string? BankName { get; set; }
+
+        public string AccountName { get; set; }
+        public string AccountNo { get; set; }
+        public string Ifsccode { get; set; }
+
+        public string? BranchAddress { get; set; }
+        public string? Filename { get; set; }
+        public string? RejectedReason { get; set; }
+
+        public int Status { get; set; }
+        public string? StatusName { get; set; }
+
+        public long CreatedBy { get; set; }
+        public DateTime? CreatedOn { get; set; }
+
+        public long? UpdatedBy { get; set; }
+        public DateTime? UpdatedOn { get; set; }
+    }
+    public class CreateUserConfigurationRequest
+    {
+        public long UserMasterId { get; set; }
+        public decimal MinTxn { get; set; } = 0;
+        public decimal MaxTxn { get; set; } = 0;
+        public int ChargeTypeOn { get; set; } = 2;
+        public int PlanId { get; set; } = 1;
+        public decimal MaxPayinamount { get; set; } = 0;
+        public int MaxNoofcountPayin { get; set; } = 0;
+        public int SameAmountPayinAllowed { get; set; } = 0;
+    }
+
+    public class UpdateUserConfigurationRequest
+    {
+        public long ConfigurationId { get; set; }
+        public long UserMasterId { get; set; }
+        public decimal MinTxn { get; set; }
+        public decimal MaxTxn { get; set; }
+        public int ChargeTypeOn { get; set; }
+        public int PlanId { get; set; }
+        public decimal MaxPayinamount { get; set; }
+        public int MaxNoofcountPayin { get; set; }
+        public int SameAmountPayinAllowed { get; set; }
+    }
+    public class CreateOtherDetailsRequest
+    {
+        public long? UserMasterId { get; set; }
+        public string? Pancard { get; set; }
+        public string? AadharCard { get; set; }
+        public string? GSTNo { get; set; }
+        public int Status { get; set; } = 1;
+    }
+
+    public class UpdateOtherDetailsRequest
+    {
+        public long OtherDetailId { get; set; }
+        public long? UserMasterId { get; set; }
+        public string? Pancard { get; set; }
+        public string? AadharCard { get; set; }
+        public string? GSTNo { get; set; }
+        public int Status { get; set; }
+    }
 }

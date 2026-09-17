@@ -47,4 +47,92 @@ namespace FINOVA.DataModel.UserMgr
         public DateTimeOffset? UpdatedOn { get; set; }
         public long? UpdatedBy { get; set; }
     }
+    public class GetUserAddressResponse
+    {
+        public long UserAddressID { get; set; }
+        public long UserMasterId { get; set; }
+
+        public int AddressTypeId { get; set; }
+        public string? AddressTypeName { get; set; }
+
+        public string Pincode { get; set; }
+        public long PincodeDataId { get; set; }
+
+        public string Address1 { get; set; }
+        public string? Address2 { get; set; }
+        public string? Address3 { get; set; }
+
+        public int Status { get; set; }
+        public string? StatusName { get; set; }
+
+        public DateTime? CreatedOn { get; set; }
+        public long? CreatedBy { get; set; }
+
+        public DateTime? UpdatedOn { get; set; }
+        public long? UpdatedBy { get; set; }
+    }
+    public class GetUserKycResponse
+    {
+        public long UserKYCID { get; set; }
+        public long UserMasterId { get; set; }
+
+        public int KycID { get; set; }
+        public string? KycTypeName { get; set; }
+
+        public string? DocumentNo { get; set; }
+        public string? FileUrl { get; set; }
+        public string? MediaExtension { get; set; }
+        public string? MediaContentType { get; set; }
+        public string? RejectedReason { get; set; }
+
+        public int Status { get; set; }
+        public string? StatusName { get; set; }
+
+        public DateTime? CreatedOn { get; set; }
+        public long CreatedBy { get; set; }
+
+        public DateTime? UpdatedOn { get; set; }
+        public long? UpdatedBy { get; set; }
+    }
+    public class GetUserConfigurationResponse
+    {
+        public long ConfigurationId { get; set; }
+        public long UserMasterId { get; set; }
+
+        public decimal MinTxn { get; set; }
+        public decimal MaxTxn { get; set; }
+
+        public int ChargeTypeOn { get; set; }
+
+        public int PlanId { get; set; }
+        public string? PlanName { get; set; }
+
+        public decimal MaxPayinamount { get; set; }
+        public int MaxNoofcountPayin { get; set; }
+        public int SameAmountPayinAllowed { get; set; }
+
+        public DateTime? CreatedOn { get; set; }
+        public long CreatedBy { get; set; }
+
+        public DateTime? UpdatedOn { get; set; }
+        public long? UpdatedBy { get; set; }
+    }
+    public class GetOtherDetailsResponse
+    {
+        public long OtherDetailId { get; set; }
+        public long? UserMasterId { get; set; }
+
+        public string? Pancard { get; set; }
+        public string? AadharCard { get; set; }
+        public string? GSTNo { get; set; }
+
+        public int Status { get; set; }
+        public string? StatusName { get; set; }
+
+        public DateTime? CreatedOn { get; set; }
+        public long CreatedBy { get; set; }
+
+        public DateTime? UpdatedOn { get; set; }
+        public long? UpdatedBy { get; set; }
+    }
 }
