@@ -4,6 +4,7 @@ using FINOVA.DataModel.Shared;
 using FINOVA.DataModel.UserMgr;
 using FINOVA.Provider;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace FINOVA.API.Controllers
 {
@@ -18,10 +19,12 @@ namespace FINOVA.API.Controllers
     {
         public readonly UserMgrProvider _Provider;
         private readonly AuthenticationHelper _callValidator;
-        public UserMgrController() 
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        public UserMgrController(IWebHostEnvironment webHostEnvironment) 
         {
             _Provider = new UserMgrProvider();
             _callValidator = new AuthenticationHelper();
+            _webHostEnvironment = webHostEnvironment;
         }
         // ============================================================
         // USER MASTER - CREATE
@@ -591,32 +594,135 @@ namespace FINOVA.API.Controllers
 
             return Json(response);
         }
-        // ============================================================
-        // CREATE USER KYC
-        // ============================================================
-        [HttpPost("CreateUserKyc")]
+
+        [HttpPost]
+        [Route("CreateUserKyc")]
         public async Task<IActionResult> CreateUserKyc(
-            [FromBody] CreateUserKycRequest request)
+    [FromForm] CreateUserKycUploadRequest request)
         {
-            SimpleResponse response = new SimpleResponse();
-
-            ErrorResponse error =
-                await _callValidator.AuthenticateAndAuthorize(
-                    CallerUser,
-                    true);
-
-            if (error.HasError)
+            if (request == null)
             {
-                response.SetError(error);
-                return Json(response);
+                return BadRequest("Invalid request.");
             }
 
-            response =
+            if (request.File == null || request.File.Length == 0)
+            {
+                return BadRequest("Please select a file.");
+            }
+
+            // --------------------------------------------------------
+            // 1. Validate file extension
+            // --------------------------------------------------------
+            string extension = Path
+                .GetExtension(request.File.FileName)
+                .ToLowerInvariant();
+
+            string[] allowedExtensions =
+            {
+        ".pdf",
+        ".jpg",
+        ".jpeg",
+        ".png"
+    };
+
+            if (!allowedExtensions.Contains(extension))
+            {
+                return BadRequest(
+                    "Only PDF, JPG, JPEG and PNG files are allowed.");
+            }
+
+            // --------------------------------------------------------
+            // 2. Validate file size - Example: Maximum 5 MB
+            // --------------------------------------------------------
+            const long maxFileSize = 5 * 1024 * 1024;
+
+            if (request.File.Length > maxFileSize)
+            {
+                return BadRequest(
+                    "File size cannot be greater than 5 MB.");
+            }
+
+            // --------------------------------------------------------
+            // 3. Create upload directory
+            // wwwroot/uploads/kyc/{UserMasterId}
+            // --------------------------------------------------------
+            string uploadFolder = Path.Combine(
+                _webHostEnvironment.WebRootPath,
+                "uploads",
+                "kyc",
+                request.UserMasterId.ToString());
+
+            if (!Directory.Exists(uploadFolder))
+            {
+                Directory.CreateDirectory(uploadFolder);
+            }
+
+            // --------------------------------------------------------
+            // 4. Generate unique file name
+            // --------------------------------------------------------
+            string uniqueFileName =
+                $"{Guid.NewGuid():N}{extension}";
+
+            string physicalFilePath = Path.Combine(
+                uploadFolder,
+                uniqueFileName);
+
+            // --------------------------------------------------------
+            // 5. Save file
+            // --------------------------------------------------------
+            await using (var stream = new FileStream(
+                physicalFilePath,
+                FileMode.Create))
+            {
+                await request.File.CopyToAsync(stream);
+            }
+
+            // --------------------------------------------------------
+            // 6. Generate URL/path to store in database
+            // --------------------------------------------------------
+            string fileUrl =
+                $"/uploads/kyc/{request.UserMasterId}/{uniqueFileName}";
+
+            // --------------------------------------------------------
+            // 7. Get Content Type
+            // --------------------------------------------------------
+            var contentTypeProvider =
+                new FileExtensionContentTypeProvider();
+
+            if (!contentTypeProvider.TryGetContentType(
+                    uniqueFileName,
+                    out string? contentType))
+            {
+                contentType = "application/octet-stream";
+            }
+
+            // --------------------------------------------------------
+            // 8. Prepare Provider request
+            // --------------------------------------------------------
+            CreateUserKycRequest providerRequest =
+                new CreateUserKycRequest
+                {
+                    UserMasterId = request.UserMasterId,
+                    KycID = request.KycID,
+                    DocumentNo = request.DocumentNo,
+
+                    FileUrl = fileUrl,
+                    MediaExtension = extension,
+                    MediaContentType = contentType,
+
+                    RejectedReason = request.RejectedReason,
+                    Status = request.Status
+                };
+
+            // --------------------------------------------------------
+            // 9. Call Provider
+            // --------------------------------------------------------
+            var response =
                 await _Provider.CreateUserKyc(
-                    request,
+                    providerRequest,
                     CallerUser);
 
-            return Json(response);
+            return Ok(response);
         }
 
 
@@ -625,10 +731,13 @@ namespace FINOVA.API.Controllers
         // ============================================================
         [HttpPost("UpdateUserKyc")]
         public async Task<IActionResult> UpdateUserKyc(
-            [FromBody] UpdateUserKycRequest request)
+            [FromForm] UpdateUserKycUploadRequest request)
         {
             SimpleResponse response = new SimpleResponse();
 
+            // --------------------------------------------------------
+            // 1. Authentication / Authorization
+            // --------------------------------------------------------
             ErrorResponse error =
                 await _callValidator.AuthenticateAndAuthorize(
                     CallerUser,
@@ -640,9 +749,178 @@ namespace FINOVA.API.Controllers
                 return Json(response);
             }
 
+            // --------------------------------------------------------
+            // 2. Validate Request
+            // --------------------------------------------------------
+            if (request == null)
+            {
+                return BadRequest("Invalid request.");
+            }
+
+            if (request.UserKycMasterId <= 0 ||
+                request.UserMasterId <= 0 ||
+                request.KycID <= 0)
+            {
+                return BadRequest("Invalid KYC information.");
+            }
+
+            // --------------------------------------------------------
+            // 3. File variables
+            // --------------------------------------------------------
+            string? fileUrl = null;
+            string? mediaExtension = null;
+            string? mediaContentType = null;
+
+            // --------------------------------------------------------
+            // 4. Check if user uploaded a NEW file
+            // --------------------------------------------------------
+            if (request.File != null &&
+                request.File.Length > 0)
+            {
+                // ----------------------------------------------------
+                // Get Extension
+                // ----------------------------------------------------
+                string extension = Path
+                    .GetExtension(request.File.FileName)
+                    .ToLowerInvariant();
+
+                // ----------------------------------------------------
+                // Validate Extension
+                // ----------------------------------------------------
+                string[] allowedExtensions =
+                {
+            ".pdf",
+            ".jpg",
+            ".jpeg",
+            ".png"
+        };
+
+                if (!allowedExtensions.Contains(extension))
+                {
+                    return BadRequest(
+                        "Only PDF, JPG, JPEG and PNG files are allowed.");
+                }
+
+                // ----------------------------------------------------
+                // Validate File Size - Maximum 5 MB
+                // ----------------------------------------------------
+                const long maxFileSize = 5 * 1024 * 1024;
+
+                if (request.File.Length > maxFileSize)
+                {
+                    return BadRequest(
+                        "File size cannot be greater than 5 MB.");
+                }
+
+                // ----------------------------------------------------
+                // 5. Create Upload Folder
+                // ----------------------------------------------------
+                string webRootPath =
+                    _webHostEnvironment.WebRootPath;
+
+                // Handle case where wwwroot does not exist
+                if (string.IsNullOrWhiteSpace(webRootPath))
+                {
+                    webRootPath = Path.Combine(
+                        Directory.GetCurrentDirectory(),
+                        "wwwroot");
+                }
+
+                string uploadFolder = Path.Combine(
+                    webRootPath,
+                    "uploads",
+                    "kyc",
+                    request.UserMasterId.ToString());
+
+                if (!Directory.Exists(uploadFolder))
+                {
+                    Directory.CreateDirectory(uploadFolder);
+                }
+
+                // ----------------------------------------------------
+                // 6. Generate Unique File Name
+                // ----------------------------------------------------
+                string uniqueFileName =
+                    $"{Guid.NewGuid():N}{extension}";
+
+                string physicalFilePath = Path.Combine(
+                    uploadFolder,
+                    uniqueFileName);
+
+                // ----------------------------------------------------
+                // 7. Save File
+                // ----------------------------------------------------
+                await using (FileStream stream = new FileStream(
+                    physicalFilePath,
+                    FileMode.Create))
+                {
+                    await request.File.CopyToAsync(stream);
+                }
+
+                // ----------------------------------------------------
+                // 8. Prepare File Information
+                // ----------------------------------------------------
+                fileUrl =
+                    $"/uploads/kyc/{request.UserMasterId}/{uniqueFileName}";
+
+                mediaExtension = extension;
+
+                // ----------------------------------------------------
+                // 9. Get Content Type
+                // ----------------------------------------------------
+                var contentTypeProvider =
+                    new FileExtensionContentTypeProvider();
+
+                if (!contentTypeProvider.TryGetContentType(
+                        uniqueFileName,
+                        out string? contentType))
+                {
+                    contentType = "application/octet-stream";
+                }
+
+                mediaContentType = contentType;
+            }
+
+            // --------------------------------------------------------
+            // 10. Create Provider Request
+            // --------------------------------------------------------
+            UpdateUserKycRequest providerRequest =
+                new UpdateUserKycRequest
+                {
+                    UserKYCID =
+                        request.UserKycMasterId,
+
+                    UserMasterId =
+                        request.UserMasterId,
+
+                    KycID =
+                        request.KycID,
+
+                    DocumentNo =
+                        request.DocumentNo,
+
+                    FileUrl =
+                        fileUrl,
+
+                    MediaExtension =
+                        mediaExtension,
+
+                    MediaContentType =
+                        mediaContentType,
+
+                    RejectedReason =
+                        request.RejectedReason,
+
+                    Status =
+                        request.Status
+                };
+
+            // --------------------------------------------------------
+            // 11. Call Provider
+            // --------------------------------------------------------
             response =
                 await _Provider.UpdateUserKyc(
-                    request,
+                    providerRequest,
                     CallerUser);
 
             return Json(response);
@@ -822,10 +1100,13 @@ namespace FINOVA.API.Controllers
         // ============================================================
         [HttpPost("CreateUserBankAccount")]
         public async Task<IActionResult> CreateUserBankAccount(
-            [FromBody] CreateUserBankAccountRequest request)
+            [FromForm] CreateUserBankAccountUploadRequest request)
         {
             SimpleResponse response = new SimpleResponse();
 
+            // --------------------------------------------------------
+            // 1. Authentication / Authorization
+            // --------------------------------------------------------
             ErrorResponse error =
                 await _callValidator.AuthenticateAndAuthorize(
                     CallerUser,
@@ -837,9 +1118,171 @@ namespace FINOVA.API.Controllers
                 return Json(response);
             }
 
+            // --------------------------------------------------------
+            // 2. Validate Request
+            // --------------------------------------------------------
+            if (request == null)
+            {
+                return BadRequest("Invalid request.");
+            }
+
+            if (request.UserMasterID <= 0 ||
+                request.BankId <= 0 ||
+                string.IsNullOrWhiteSpace(request.AccountName) ||
+                string.IsNullOrWhiteSpace(request.AccountNo) ||
+                string.IsNullOrWhiteSpace(request.Ifsccode))
+            {
+                return BadRequest("Invalid bank account information.");
+            }
+
+            // --------------------------------------------------------
+            // 3. File Variables
+            // --------------------------------------------------------
+            string? fileUrl = null;
+            string? mediaExtension = null;
+            string? mediaContentType = null;
+
+            // --------------------------------------------------------
+            // 4. Upload File
+            // --------------------------------------------------------
+            if (request.File != null &&
+                request.File.Length > 0)
+            {
+                string extension = Path
+                    .GetExtension(request.File.FileName)
+                    .ToLowerInvariant();
+
+                // ----------------------------------------------------
+                // Validate Extension
+                // ----------------------------------------------------
+                string[] allowedExtensions =
+                {
+            ".pdf",
+            ".jpg",
+            ".jpeg",
+            ".png"
+        };
+
+                if (!allowedExtensions.Contains(extension))
+                {
+                    return BadRequest(
+                        "Only PDF, JPG, JPEG and PNG files are allowed.");
+                }
+
+                // ----------------------------------------------------
+                // Maximum 5 MB
+                // ----------------------------------------------------
+                const long maxFileSize =
+                    5 * 1024 * 1024;
+
+                if (request.File.Length > maxFileSize)
+                {
+                    return BadRequest(
+                        "File size cannot be greater than 5 MB.");
+                }
+
+                // ----------------------------------------------------
+                // Get wwwroot
+                // ----------------------------------------------------
+                string webRootPath =
+                    _webHostEnvironment.WebRootPath;
+
+                if (string.IsNullOrWhiteSpace(webRootPath))
+                {
+                    webRootPath = Path.Combine(
+                        Directory.GetCurrentDirectory(),
+                        "wwwroot");
+                }
+
+                // ----------------------------------------------------
+                // Create Folder
+                //
+                // wwwroot/uploads/bank/{UserMasterID}
+                // ----------------------------------------------------
+                string uploadFolder = Path.Combine(
+                    webRootPath,
+                    "uploads",
+                    "bank",
+                    request.UserMasterID.ToString());
+
+                if (!Directory.Exists(uploadFolder))
+                {
+                    Directory.CreateDirectory(uploadFolder);
+                }
+
+                // ----------------------------------------------------
+                // Generate Unique File Name
+                // ----------------------------------------------------
+                string uniqueFileName =
+                    $"{Guid.NewGuid():N}{extension}";
+
+                string physicalFilePath =
+                    Path.Combine(
+                        uploadFolder,
+                        uniqueFileName);
+
+                // ----------------------------------------------------
+                // Save File
+                // ----------------------------------------------------
+                await using (FileStream stream =
+                    new FileStream(
+                        physicalFilePath,
+                        FileMode.Create))
+                {
+                    await request.File.CopyToAsync(stream);
+                }
+
+                // ----------------------------------------------------
+                // Generate URL
+                // ----------------------------------------------------
+                fileUrl =
+                    $"/uploads/bank/{request.UserMasterID}/{uniqueFileName}";
+
+                mediaExtension = extension;
+
+                // ----------------------------------------------------
+                // Get Content Type
+                // ----------------------------------------------------
+                var contentTypeProvider =
+                    new FileExtensionContentTypeProvider();
+
+                if (!contentTypeProvider.TryGetContentType(
+                        uniqueFileName,
+                        out string? contentType))
+                {
+                    contentType =
+                        "application/octet-stream";
+                }
+
+                mediaContentType = contentType;
+            }
+
+            // --------------------------------------------------------
+            // 5. Create Provider Request
+            // --------------------------------------------------------
+            CreateUserBankAccountRequest providerRequest =
+                new CreateUserBankAccountRequest
+                {
+                    UserMasterID = request.UserMasterID,
+                    BankId = request.BankId,
+
+                    AccountName = request.AccountName,
+                    AccountNo = request.AccountNo,
+                    Ifsccode = request.Ifsccode,
+
+                    FileUrl = fileUrl,
+                    MediaExtension = mediaExtension,
+                    MediaContentType = mediaContentType,
+
+                    Status = request.Status
+                };
+
+            // --------------------------------------------------------
+            // 6. Call Provider
+            // --------------------------------------------------------
             response =
                 await _Provider.CreateUserBankAccount(
-                    request,
+                    providerRequest,
                     CallerUser);
 
             return Json(response);
@@ -851,10 +1294,13 @@ namespace FINOVA.API.Controllers
         // ============================================================
         [HttpPost("UpdateUserBankAccount")]
         public async Task<IActionResult> UpdateUserBankAccount(
-            [FromBody] UpdateUserBankAccountRequest request)
+            [FromForm] UpdateUserBankAccountUploadRequest request)
         {
             SimpleResponse response = new SimpleResponse();
 
+            // --------------------------------------------------------
+            // 1. Authentication / Authorization
+            // --------------------------------------------------------
             ErrorResponse error =
                 await _callValidator.AuthenticateAndAuthorize(
                     CallerUser,
@@ -866,9 +1312,176 @@ namespace FINOVA.API.Controllers
                 return Json(response);
             }
 
+            // --------------------------------------------------------
+            // 2. Validate Request
+            // --------------------------------------------------------
+            if (request == null)
+            {
+                return BadRequest("Invalid request.");
+            }
+
+            if (request.OriginatorAccountID <= 0 ||
+                request.UserMasterID <= 0 ||
+                request.BankId <= 0 ||
+                string.IsNullOrWhiteSpace(request.AccountName) ||
+                string.IsNullOrWhiteSpace(request.AccountNo) ||
+                string.IsNullOrWhiteSpace(request.Ifsccode))
+            {
+                return BadRequest("Invalid bank account information.");
+            }
+
+            string? fileUrl = null;
+            string? mediaExtension = null;
+            string? mediaContentType = null;
+
+            // --------------------------------------------------------
+            // 3. Upload New File If Provided
+            // --------------------------------------------------------
+            if (request.File != null &&
+                request.File.Length > 0)
+            {
+                string extension = Path
+                    .GetExtension(request.File.FileName)
+                    .ToLowerInvariant();
+
+                string[] allowedExtensions =
+                {
+            ".pdf",
+            ".jpg",
+            ".jpeg",
+            ".png"
+        };
+
+                if (!allowedExtensions.Contains(extension))
+                {
+                    return BadRequest(
+                        "Only PDF, JPG, JPEG and PNG files are allowed.");
+                }
+
+                // Maximum 5 MB
+                const long maxFileSize =
+                    5 * 1024 * 1024;
+
+                if (request.File.Length > maxFileSize)
+                {
+                    return BadRequest(
+                        "File size cannot be greater than 5 MB.");
+                }
+
+                string webRootPath =
+                    _webHostEnvironment.WebRootPath;
+
+                if (string.IsNullOrWhiteSpace(webRootPath))
+                {
+                    webRootPath = Path.Combine(
+                        Directory.GetCurrentDirectory(),
+                        "wwwroot");
+                }
+
+                // ----------------------------------------------------
+                // Folder
+                // ----------------------------------------------------
+                string uploadFolder = Path.Combine(
+                    webRootPath,
+                    "uploads",
+                    "bank",
+                    request.UserMasterID.ToString());
+
+                if (!Directory.Exists(uploadFolder))
+                {
+                    Directory.CreateDirectory(uploadFolder);
+                }
+
+                // ----------------------------------------------------
+                // Generate File Name
+                // ----------------------------------------------------
+                string uniqueFileName =
+                    $"{Guid.NewGuid():N}{extension}";
+
+                string physicalFilePath =
+                    Path.Combine(
+                        uploadFolder,
+                        uniqueFileName);
+
+                // ----------------------------------------------------
+                // Save File
+                // ----------------------------------------------------
+                await using (FileStream stream =
+                    new FileStream(
+                        physicalFilePath,
+                        FileMode.Create))
+                {
+                    await request.File.CopyToAsync(stream);
+                }
+
+                // ----------------------------------------------------
+                // URL
+                // ----------------------------------------------------
+                fileUrl =
+                    $"/uploads/bank/{request.UserMasterID}/{uniqueFileName}";
+
+                mediaExtension = extension;
+
+                // ----------------------------------------------------
+                // Content Type
+                // ----------------------------------------------------
+                var contentTypeProvider =
+                    new FileExtensionContentTypeProvider();
+
+                if (!contentTypeProvider.TryGetContentType(
+                        uniqueFileName,
+                        out string? contentType))
+                {
+                    contentType =
+                        "application/octet-stream";
+                }
+
+                mediaContentType = contentType;
+            }
+
+            // --------------------------------------------------------
+            // 4. Prepare Provider Request
+            // --------------------------------------------------------
+            UpdateUserBankAccountRequest providerRequest =
+                new UpdateUserBankAccountRequest
+                {
+                    OriginatorAccountID =
+                        request.OriginatorAccountID,
+
+                    UserMasterID =
+                        request.UserMasterID,
+
+                    BankId =
+                        request.BankId,
+
+                    AccountName =
+                        request.AccountName,
+
+                    AccountNo =
+                        request.AccountNo,
+
+                    Ifsccode =
+                        request.Ifsccode,
+
+                    FileUrl =
+                        fileUrl,
+
+                    MediaExtension =
+                        mediaExtension,
+
+                    MediaContentType =
+                        mediaContentType,
+
+                    Status =
+                        request.Status
+                };
+
+            // --------------------------------------------------------
+            // 5. Call Provider
+            // --------------------------------------------------------
             response =
                 await _Provider.UpdateUserBankAccount(
-                    request,
+                    providerRequest,
                     CallerUser);
 
             return Json(response);
@@ -1439,5 +2052,6 @@ namespace FINOVA.API.Controllers
 
             return Json(response);
         }
+
     }
 }

@@ -1532,7 +1532,7 @@ namespace FINOVA.Repository
             _database.AddInParameter(
                 dbCommand,
                 "@Filename",
-                request.Filename);
+                request.FileUrl);
 
             _database.AddInParameter(
                 dbCommand,
@@ -1613,7 +1613,7 @@ namespace FINOVA.Repository
             _database.AddInParameter(
                 dbCommand,
                 "@Filename",
-                request.Filename);
+                request.FileUrl);
 
             _database.AddInParameter(
                 dbCommand,

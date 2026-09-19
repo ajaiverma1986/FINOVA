@@ -10,6 +10,7 @@ namespace FINOVA.Provider
    public class UserMgrProvider: BaseProvider
     {
         public readonly UserMgrRepository _repository = null;
+       
         public UserMgrProvider()
         {
             _repository = new UserMgrRepository();
