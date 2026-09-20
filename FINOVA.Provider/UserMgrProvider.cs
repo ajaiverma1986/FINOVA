@@ -1296,5 +1296,230 @@ namespace FINOVA.Provider
 
             return response;
         }
+        // ============================================================
+        // CREATE USER ROLE
+        // ============================================================
+        public async Task<SimpleResponse> CreateUserRole(
+            CreateUserRoleRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            if (request == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            if (request.UserMasterID <= 0 ||
+                request.RoleID <= 0 ||
+                request.ApplicationID <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            response.Result =
+                await _repository.CreateUserRole(
+                    request,
+                    serviceUser);
+
+            return response;
+        }
+
+
+        // ============================================================
+        // UPDATE USER ROLE
+        // ============================================================
+        public async Task<SimpleResponse> UpdateUserRole(
+            UpdateUserRoleRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            if (request == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            if (request.UserRoleID <= 0 ||
+                request.UserMasterID <= 0 ||
+                request.RoleID <= 0 ||
+                request.ApplicationID <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            response =
+                await _repository.UpdateUserRole(
+                    request,
+                    serviceUser);
+
+            return response;
+        }
+
+
+        // ============================================================
+        // DELETE USER ROLE
+        // ============================================================
+        public async Task<SimpleResponse> DeleteUserRole(
+            long userRoleID,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            if (userRoleID <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            response =
+                await _repository.DeleteUserRole(
+                    userRoleID,
+                    serviceUser);
+
+            return response;
+        }
+
+
+        // ============================================================
+        // GET USER ROLE BY ID
+        // ============================================================
+        public async Task<SimpleResponse> GetUserRoleByID(
+            long userRoleID,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            if (userRoleID <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            response.Result =
+                await _repository.GetUserRoleByID(
+                    userRoleID,
+                    serviceUser);
+
+            return response;
+        }
+
+
+        // ============================================================
+        // GET ALL USER ROLES
+        // ============================================================
+        public async Task<SimpleResponse> GetAllUserRoles(
+            byte? status,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            response.Result =
+                await _repository.GetAllUserRoles(
+                    status,
+                    serviceUser);
+
+            return response;
+        }
+
+
+        // ============================================================
+        // GET USER ROLES BY USER MASTER ID
+        // ============================================================
+        public async Task<SimpleResponse> GetUserRolesByUserMasterID(
+            long userMasterID,
+            byte? applicationID,
+            byte? status,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            if (userMasterID <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            if (applicationID.HasValue &&
+                applicationID.Value <= 0)
+            {
+                applicationID = null;
+            }
+
+            response.Result =
+                await _repository.GetUserRolesByUserMasterID(
+                    userMasterID,
+                    applicationID,
+                    status,
+                    serviceUser);
+
+            return response;
+        }
+
+
+        // ============================================================
+        // GET USERS BY ROLE ID
+        // ============================================================
+        public async Task<SimpleResponse> GetUserRolesByRoleID(
+            short roleID,
+            byte? applicationID,
+            byte? status,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            if (roleID <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            if (applicationID.HasValue &&
+                applicationID.Value <= 0)
+            {
+                applicationID = null;
+            }
+
+            response.Result =
+                await _repository.GetUserRolesByRoleID(
+                    roleID,
+                    applicationID,
+                    status,
+                    serviceUser);
+
+            return response;
+        }
+
+
+        // ============================================================
+        // GET ACTIVE USER ROLES
+        // LOGIN / AUTHORIZATION
+        // ============================================================
+        public async Task<SimpleResponse> GetActiveUserRoles(
+            long userMasterID,
+            byte applicationID,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            if (userMasterID <= 0 ||
+                applicationID <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            response.Result =
+                await _repository.GetActiveUserRoles(
+                    userMasterID,
+                    applicationID,
+                    serviceUser);
+
+            return response;
+        }
     }
 }

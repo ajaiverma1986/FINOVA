@@ -63,7 +63,31 @@ namespace FINOVA.Repository.Shared
             }
             return valueToReturn;
         }
+        public decimal GetDecimalReportValue(
+    System.Data.IDataReader dataReader,
+    string columnName)
+        {
+            if (dataReader[columnName] == DBNull.Value)
+            {
+                return 0;
+            }
 
+            return Convert.ToDecimal(
+                dataReader[columnName]);
+        }
+     
+
+        public DateTimeOffset? GetNullableDateTimeOffset(
+            System.Data.IDataReader dataReader,
+            string columnName)
+        {
+            if (dataReader[columnName] == DBNull.Value)
+            {
+                return null;
+            }
+
+            return (DateTimeOffset)dataReader[columnName];
+        }
         protected Int16? GetSmallIntegerValue(IDataReader dataReader, string columnName)
         {
             object value = dataReader[columnName];

@@ -135,4 +135,50 @@ namespace FINOVA.DataModel.UserMgr
         public DateTime? UpdatedOn { get; set; }
         public long? UpdatedBy { get; set; }
     }
+    public class GetUserRoleResponse
+    {
+        public long UserRoleID { get; set; }
+
+        public long UserMasterID { get; set; }
+
+        public string? UserName { get; set; }
+        public string? DisplayName { get; set; }
+
+        public string? FirstName { get; set; }
+        public string? MiddleName { get; set; }
+        public string? LastName { get; set; }
+
+        public string? EmailId { get; set; }
+        public string? MobileNo { get; set; }
+
+        public short RoleID { get; set; }
+
+        public string? RoleName { get; set; }
+        public string? RoleDescription { get; set; }
+
+        public byte ApplicationID { get; set; }
+
+        public byte Status { get; set; }
+        public string? StatusName { get; set; }
+
+        public DateTimeOffset CreatedOn { get; set; }
+        public long CreatedBy { get; set; }
+        public string? CreatedByName { get; set; }
+
+        public DateTimeOffset? UpdatedOn { get; set; }
+        public long? UpdatedBy { get; set; }
+        public string? UpdatedByName { get; set; }
+    }
+    public class GetActiveUserRoleResponse
+    {
+        public long UserRoleID { get; set; }
+
+        public long UserMasterID { get; set; }
+
+        public short RoleID { get; set; }
+
+        public string? RoleName { get; set; }
+
+        public byte ApplicationID { get; set; }
+    }
 }

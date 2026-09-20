@@ -112,7 +112,35 @@ namespace FINOVA.DataModel.Wallet
 
         public int Status { get; set; } = 1;
     }
+    public class CreatePayinRequestUploadRequest
+    {
+        public long UserMasterId { get; set; }
 
+        public int PaymentChanelID { get; set; }
+
+        public int PaymentModeId { get; set; }
+
+        public decimal Amount { get; set; }
+
+        public decimal Charge { get; set; }
+
+        public long? OriginatorAccountId { get; set; }
+
+        public long? BenficiaryAccountId { get; set; }
+
+        public DateTime? DepositDate { get; set; }
+
+        public string? RefNo1 { get; set; }
+
+        public string? RefNo2 { get; set; }
+
+        public string? Remarks { get; set; }
+
+        // Receipt / payment proof uploaded from React
+        public IFormFile? File { get; set; }
+
+        public int Status { get; set; } = 1;
+    }
 
     public class ApproveRejectPayinRequest
     {

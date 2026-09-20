@@ -4,6 +4,7 @@ using FINOVA.DataModel.Shared;
 using FINOVA.DataModel.Wallet;
 using FINOVA.Provider;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace FINOVA.API.Controllers
 {
@@ -583,14 +584,18 @@ namespace FINOVA.API.Controllers
             return Json(response);
         }
         // ============================================================
+        // ============================================================
         // CREATE PAYIN REQUEST
         // ============================================================
         [HttpPost("CreatePayinRequest")]
         public async Task<IActionResult> CreatePayinRequest(
-            [FromBody] CreatePayinRequestRequest request)
+            [FromForm] CreatePayinRequestUploadRequest request)
         {
             SimpleResponse response = new SimpleResponse();
 
+            // --------------------------------------------------------
+            // 1. Authentication / Authorization
+            // --------------------------------------------------------
             ErrorResponse error =
                 await _callValidator.AuthenticateAndAuthorize(
                     CallerUser,
@@ -602,9 +607,190 @@ namespace FINOVA.API.Controllers
                 return Json(response);
             }
 
+            // --------------------------------------------------------
+            // 2. Validate Request
+            // --------------------------------------------------------
+            if (request == null)
+            {
+                return BadRequest("Invalid request.");
+            }
+
+            string? receiptFileUrl = null;
+            string? mediaExtension = null;
+            string? mediaContentType = null;
+
+            // --------------------------------------------------------
+            // 3. Check File
+            // --------------------------------------------------------
+            if (request.File != null &&
+                request.File.Length > 0)
+            {
+                // ----------------------------------------------------
+                // Get Extension
+                // ----------------------------------------------------
+                string extension = Path
+                    .GetExtension(request.File.FileName)
+                    .ToLowerInvariant();
+
+                // ----------------------------------------------------
+                // Validate Extension
+                // ----------------------------------------------------
+                string[] allowedExtensions =
+                {
+            ".pdf",
+            ".jpg",
+            ".jpeg",
+            ".png"
+        };
+
+                if (!allowedExtensions.Contains(extension))
+                {
+                    return BadRequest(
+                        "Only PDF, JPG, JPEG and PNG files are allowed.");
+                }
+
+                // ----------------------------------------------------
+                // Validate File Size - Maximum 5 MB
+                // ----------------------------------------------------
+                const long maxFileSize =
+                    5 * 1024 * 1024;
+
+                if (request.File.Length > maxFileSize)
+                {
+                    return BadRequest(
+                        "File size cannot be greater than 5 MB.");
+                }
+
+                // ----------------------------------------------------
+                // 4. Get wwwroot
+                // ----------------------------------------------------
+                string webRootPath =
+                    _webHostEnvironment.WebRootPath;
+
+                if (string.IsNullOrWhiteSpace(webRootPath))
+                {
+                    webRootPath = Path.Combine(
+                        Directory.GetCurrentDirectory(),
+                        "wwwroot");
+                }
+
+                // ----------------------------------------------------
+                // 5. Create Upload Folder
+                //
+                // wwwroot/uploads/payin/{UserMasterId}
+                // ----------------------------------------------------
+                string uploadFolder = Path.Combine(
+                    webRootPath,
+                    "uploads",
+                    "payin",
+                    request.UserMasterId.ToString());
+
+                if (!Directory.Exists(uploadFolder))
+                {
+                    Directory.CreateDirectory(uploadFolder);
+                }
+
+                // ----------------------------------------------------
+                // 6. Generate Unique File Name
+                // ----------------------------------------------------
+                string uniqueFileName =
+                    $"{Guid.NewGuid():N}{extension}";
+
+                string physicalFilePath =
+                    Path.Combine(
+                        uploadFolder,
+                        uniqueFileName);
+
+                // ----------------------------------------------------
+                // 7. Save File
+                // ----------------------------------------------------
+                await using (FileStream stream =
+                    new FileStream(
+                        physicalFilePath,
+                        FileMode.Create))
+                {
+                    await request.File.CopyToAsync(stream);
+                }
+
+                // ----------------------------------------------------
+                // 8. Generate File URL
+                // ----------------------------------------------------
+                receiptFileUrl =
+                    $"/uploads/payin/" +
+                    $"{request.UserMasterId}/" +
+                    $"{uniqueFileName}";
+
+                mediaExtension = extension;
+
+                // ----------------------------------------------------
+                // 9. Get Content Type
+                // ----------------------------------------------------
+                var contentTypeProvider =
+                    new FileExtensionContentTypeProvider();
+
+                if (!contentTypeProvider.TryGetContentType(
+                        uniqueFileName,
+                        out string? contentType))
+                {
+                    contentType =
+                        "application/octet-stream";
+                }
+
+                mediaContentType = contentType;
+            }
+
+            // --------------------------------------------------------
+            // 10. Create Request for Provider
+            // --------------------------------------------------------
+            CreatePayinRequestRequest providerRequest =
+                new CreatePayinRequestRequest
+                {
+                    UserMasterId =
+                        request.UserMasterId,
+
+                    PaymentChanelID =
+                        request.PaymentChanelID,
+
+                    PaymentModeId =
+                        request.PaymentModeId,
+
+                    Amount =
+                        request.Amount,
+
+                    Charge =
+                        request.Charge,
+
+                    OriginatorAccountId =
+                        request.OriginatorAccountId,
+
+                    BenficiaryAccountId =
+                        request.BenficiaryAccountId,
+
+                    DepositDate =
+                        request.DepositDate,
+
+                    RefNo1 =
+                        request.RefNo1,
+
+                    RefNo2 =
+                        request.RefNo2,
+
+                    Remarks =
+                        request.Remarks,
+
+                    RecieptFileurl =
+                        receiptFileUrl,
+
+                    Status =
+                        request.Status
+                };
+
+            // --------------------------------------------------------
+            // 11. Call Provider
+            // --------------------------------------------------------
             response =
                 await _Provider.CreatePayinRequest(
-                    request,
+                    providerRequest,
                     CallerUser);
 
             return Json(response);

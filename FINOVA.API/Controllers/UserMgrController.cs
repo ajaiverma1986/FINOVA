@@ -2052,6 +2052,241 @@ namespace FINOVA.API.Controllers
 
             return Json(response);
         }
+        // ============================================================
+        // CREATE USER ROLE
+        // ============================================================
+        [HttpPost("CreateUserRole")]
+        public async Task<IActionResult> CreateUserRole(
+            [FromBody] CreateUserRoleRequest request)
+        {
+            SimpleResponse response = new SimpleResponse();
 
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.CreateUserRole(
+                    request,
+                    CallerUser);
+
+            return Json(response);
+        }
+
+
+        // ============================================================
+        // UPDATE USER ROLE
+        // ============================================================
+        [HttpPost("UpdateUserRole")]
+        public async Task<IActionResult> UpdateUserRole(
+            [FromBody] UpdateUserRoleRequest request)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.UpdateUserRole(
+                    request,
+                    CallerUser);
+
+            return Json(response);
+        }
+
+
+        // ============================================================
+        // DELETE USER ROLE
+        // ============================================================
+        [HttpPost("DeleteUserRole")]
+        public async Task<IActionResult> DeleteUserRole(
+            [FromQuery] long userRoleID)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.DeleteUserRole(
+                    userRoleID,
+                    CallerUser);
+
+            return Json(response);
+        }
+
+
+        // ============================================================
+        // GET USER ROLE BY ID
+        // ============================================================
+        [HttpGet("GetUserRoleByID")]
+        public async Task<IActionResult> GetUserRoleByID(
+            [FromQuery] long userRoleID)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.GetUserRoleByID(
+                    userRoleID,
+                    CallerUser);
+
+            return Json(response);
+        }
+
+
+        // ============================================================
+        // GET ALL USER ROLES
+        // ============================================================
+        [HttpGet("GetAllUserRoles")]
+        public async Task<IActionResult> GetAllUserRoles(
+            [FromQuery] byte? status)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.GetAllUserRoles(
+                    status,
+                    CallerUser);
+
+            return Json(response);
+        }
+
+
+        // ============================================================
+        // GET USER ROLES BY USER MASTER ID
+        // ============================================================
+        [HttpPost("GetUserRolesByUserMasterID")]
+        public async Task<IActionResult> GetUserRolesByUserMasterID(
+            [FromBody] GetUserRolesByUserRequest request)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.GetUserRolesByUserMasterID(
+                    request.UserMasterID,
+                    request.ApplicationID,
+                    request.Status,
+                    CallerUser);
+
+            return Json(response);
+        }
+
+
+        // ============================================================
+        // GET USERS BY ROLE ID
+        // ============================================================
+        [HttpPost("GetUserRolesByRoleID")]
+        public async Task<IActionResult> GetUserRolesByRoleID(
+            [FromBody] GetUserRolesByRoleRequest request)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.GetUserRolesByRoleID(
+                    request.RoleID,
+                    request.ApplicationID,
+                    request.Status,
+                    CallerUser);
+
+            return Json(response);
+        }
+
+
+        // ============================================================
+        // GET ACTIVE USER ROLES
+        // LOGIN / AUTHORIZATION
+        // ============================================================
+        [HttpPost("GetActiveUserRoles")]
+        public async Task<IActionResult> GetActiveUserRoles(
+            [FromBody] GetActiveUserRolesRequest request)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.GetActiveUserRoles(
+                    request.UserMasterID,
+                    request.ApplicationID,
+                    CallerUser);
+
+            return Json(response);
+        }
     }
 }

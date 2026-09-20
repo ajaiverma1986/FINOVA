@@ -305,4 +305,55 @@ namespace FINOVA.DataModel.UserMgr
         public string? GSTNo { get; set; }
         public int Status { get; set; }
     }
+    public class CreateUserRoleRequest
+    {
+        public long UserMasterID { get; set; }
+        public short RoleID { get; set; }
+        public byte ApplicationID { get; set; }
+        public byte Status { get; set; } = 1;
+    }
+
+    public class UpdateUserRoleRequest
+    {
+        public long UserRoleID { get; set; }
+        public long UserMasterID { get; set; }
+        public short RoleID { get; set; }
+        public byte ApplicationID { get; set; }
+        public byte Status { get; set; }
+    }
+
+    public class GetUserRoleRequest
+    {
+        public long? UserRoleID { get; set; }
+        public long? UserMasterID { get; set; }
+        public short? RoleID { get; set; }
+        public byte? ApplicationID { get; set; }
+        public byte? Status { get; set; }
+    }
+    public class GetUserRolesByUserRequest
+    {
+        public long UserMasterID { get; set; }
+
+        public byte? ApplicationID { get; set; }
+
+        public byte? Status { get; set; }
+    }
+
+
+    public class GetUserRolesByRoleRequest
+    {
+        public short RoleID { get; set; }
+
+        public byte? ApplicationID { get; set; }
+
+        public byte? Status { get; set; }
+    }
+
+
+    public class GetActiveUserRolesRequest
+    {
+        public long UserMasterID { get; set; }
+
+        public byte ApplicationID { get; set; }
+    }
 }

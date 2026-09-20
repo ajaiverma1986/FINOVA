@@ -2603,5 +2603,547 @@ namespace FINOVA.Repository
 
             return row;
         }
+        // ============================================================
+        // CREATE USER ROLE
+        // ============================================================
+        public async Task<long> CreateUserRole(
+            CreateUserRoleRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            long outputId = 0;
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[AAC].[UserRole_Insert]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@UserMasterID",
+                request.UserMasterID);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@RoleID",
+                request.RoleID);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@ApplicationID",
+                request.ApplicationID);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@Status",
+                request.Status);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@CreatedBy",
+                serviceUser.UserMasterID);
+
+            _database.AddOutParameter(
+                dbCommand,
+                "@Out_ID",
+                OUTPARAMETER_SIZE);
+
+            await _database.ExecuteNonQueryAsync(
+                dbCommand);
+
+            outputId =
+                GetIDOutputLong(dbCommand);
+
+            return outputId;
+        }
+        // ============================================================
+        // UPDATE USER ROLE
+        // ============================================================
+        public async Task<SimpleResponse> UpdateUserRole(
+            UpdateUserRoleRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response =
+                new SimpleResponse();
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[AAC].[UserRole_Update]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@UserRoleID",
+                request.UserRoleID);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@UserMasterID",
+                request.UserMasterID);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@RoleID",
+                request.RoleID);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@ApplicationID",
+                request.ApplicationID);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@Status",
+                request.Status);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@UpdatedBy",
+                serviceUser.UserMasterID);
+
+            await _database.ExecuteNonQueryAsync(
+                dbCommand);
+
+            response.Result = request.UserRoleID;
+
+            return response;
+        }
+        // ============================================================
+        // DELETE USER ROLE
+        // ============================================================
+        public async Task<SimpleResponse> DeleteUserRole(
+            long userRoleID,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response =
+                new SimpleResponse();
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[AAC].[UserRole_Delete]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@UserRoleID",
+                userRoleID);
+
+            await _database.ExecuteNonQueryAsync(
+                dbCommand);
+
+            response.Result = userRoleID;
+
+            return response;
+        }
+        // ============================================================
+        // GET USER ROLE BY ID
+        // ============================================================
+        public async Task<GetUserRoleResponse?> GetUserRoleByID(
+            long userRoleID,
+            IFINOVAServiceUser serviceUser)
+        {
+            GetUserRoleResponse? response = null;
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[AAC].[UserRole_GetByID]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@UserRoleID",
+                userRoleID);
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(dbCommand))
+            {
+                if (dataReader.Read())
+                {
+                    response =
+                        MapUserRole(dataReader);
+                }
+            }
+
+            return response;
+        }
+        // ============================================================
+        // GET ALL USER ROLES
+        // ============================================================
+        public async Task<List<GetUserRoleResponse>> GetAllUserRoles(
+            byte? status,
+            IFINOVAServiceUser serviceUser)
+        {
+            List<GetUserRoleResponse> response =
+                new List<GetUserRoleResponse>();
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[AAC].[UserRole_GetAll]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@Status",
+                status);
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(dbCommand))
+            {
+                while (dataReader.Read())
+                {
+                    response.Add(
+                        MapUserRole(dataReader));
+                }
+            }
+
+            return response;
+        }
+        // ============================================================
+        // GET USER ROLES BY USER MASTER ID
+        // ============================================================
+        public async Task<List<GetUserRoleResponse>> GetUserRolesByUserMasterID(
+            long userMasterID,
+            byte? applicationID,
+            byte? status,
+            IFINOVAServiceUser serviceUser)
+        {
+            List<GetUserRoleResponse> response =
+                new List<GetUserRoleResponse>();
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[AAC].[UserRole_GetByUserMasterID]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@UserMasterID",
+                userMasterID);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@ApplicationID",
+                applicationID);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@Status",
+                status);
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(dbCommand))
+            {
+                while (dataReader.Read())
+                {
+                    response.Add(
+                        MapUserRole(dataReader));
+                }
+            }
+
+            return response;
+        }
+        // ============================================================
+        // GET USERS BY ROLE
+        // ============================================================
+        public async Task<List<GetUserRoleResponse>> GetUserRolesByRoleID(
+            short roleID,
+            byte? applicationID,
+            byte? status,
+            IFINOVAServiceUser serviceUser)
+        {
+            List<GetUserRoleResponse> response =
+                new List<GetUserRoleResponse>();
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[AAC].[UserRole_GetByRoleID]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@RoleID",
+                roleID);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@ApplicationID",
+                applicationID);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@Status",
+                status);
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(dbCommand))
+            {
+                while (dataReader.Read())
+                {
+                    response.Add(
+                        MapUserRole(dataReader));
+                }
+            }
+
+            return response;
+        }
+        // ============================================================
+        // GET ACTIVE USER ROLES
+        // USED FOR AUTHORIZATION
+        // ============================================================
+        public async Task<List<GetActiveUserRoleResponse>> GetActiveUserRoles(
+            long userMasterID,
+            byte applicationID,
+            IFINOVAServiceUser serviceUser)
+        {
+            List<GetActiveUserRoleResponse> response =
+                new List<GetActiveUserRoleResponse>();
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[AAC].[UserRole_GetActiveRoles]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@UserMasterID",
+                userMasterID);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@ApplicationID",
+                applicationID);
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(dbCommand))
+            {
+                while (dataReader.Read())
+                {
+                    GetActiveUserRoleResponse row =
+                        new GetActiveUserRoleResponse();
+
+                    row.UserRoleID =
+                        GetInt64Value(
+                            dataReader,
+                            "UserRoleID").Value;
+
+                    row.UserMasterID =
+                        GetInt64Value(
+                            dataReader,
+                            "UserMasterID").Value;
+
+                    row.RoleID =
+                        Convert.ToInt16(
+                            dataReader["RoleID"]);
+
+                    row.RoleName =
+                        GetStringValue(
+                            dataReader,
+                            "RoleName");
+
+                    row.ApplicationID =
+                        Convert.ToByte(
+                            dataReader["ApplicationID"]);
+
+                    response.Add(row);
+                }
+            }
+
+            return response;
+        }
+        // ============================================================
+        // MAP USER ROLE
+        // ============================================================
+        private GetUserRoleResponse MapUserRole(
+            System.Data.IDataReader dataReader)
+        {
+            GetUserRoleResponse row =
+                new GetUserRoleResponse();
+
+            row.UserRoleID =
+                GetInt64Value(
+                    dataReader,
+                    "UserRoleID").Value;
+
+            row.UserMasterID =
+                GetInt64Value(
+                    dataReader,
+                    "UserMasterID").Value;
+
+            row.UserName =
+                GetStringValue(
+                    dataReader,
+                    "UserName");
+
+            row.DisplayName =
+                GetStringValue(
+                    dataReader,
+                    "DisplayName");
+
+
+            // ========================================================
+            // OPTIONAL USER INFORMATION
+            // ========================================================
+
+            if (ColumnExists(dataReader, "FirstName"))
+            {
+                row.FirstName =
+                    GetStringValue(
+                        dataReader,
+                        "FirstName");
+            }
+
+            if (ColumnExists(dataReader, "MiddleName"))
+            {
+                row.MiddleName =
+                    GetStringValue(
+                        dataReader,
+                        "MiddleName");
+            }
+
+            if (ColumnExists(dataReader, "LastName"))
+            {
+                row.LastName =
+                    GetStringValue(
+                        dataReader,
+                        "LastName");
+            }
+
+            if (ColumnExists(dataReader, "EmailId"))
+            {
+                row.EmailId =
+                    GetStringValue(
+                        dataReader,
+                        "EmailId");
+            }
+
+            if (ColumnExists(dataReader, "MobileNo"))
+            {
+                row.MobileNo =
+                    GetStringValue(
+                        dataReader,
+                        "MobileNo");
+            }
+
+
+            // ========================================================
+            // ROLE
+            // ========================================================
+
+            row.RoleID =
+                Convert.ToInt16(
+                    dataReader["RoleID"]);
+
+            row.RoleName =
+                GetStringValue(
+                    dataReader,
+                    "RoleName");
+
+            if (ColumnExists(
+                dataReader,
+                "RoleDescription"))
+            {
+                row.RoleDescription =
+                    GetStringValue(
+                        dataReader,
+                        "RoleDescription");
+            }
+
+
+            // ========================================================
+            // APPLICATION
+            // ========================================================
+
+            row.ApplicationID =
+                Convert.ToByte(
+                    dataReader["ApplicationID"]);
+
+
+            // ========================================================
+            // STATUS
+            // ========================================================
+
+            row.Status =
+                Convert.ToByte(
+                    dataReader["Status"]);
+
+            row.StatusName =
+                GetStringValue(
+                    dataReader,
+                    "StatusName");
+
+
+            // ========================================================
+            // CREATED
+            // ========================================================
+
+            if (ColumnExists(dataReader, "CreatedOn"))
+            {
+                row.CreatedOn =
+                    GetDateTimeOffsetValue(
+                        dataReader,
+                        "CreatedOn").Value;
+            }
+
+            if (ColumnExists(dataReader, "Createdby"))
+            {
+                row.CreatedBy =
+                    GetInt64Value(
+                        dataReader,
+                        "Createdby").Value;
+            }
+
+            if (ColumnExists(
+                dataReader,
+                "CreatedByName"))
+            {
+                row.CreatedByName =
+                    GetStringValue(
+                        dataReader,
+                        "CreatedByName");
+            }
+
+
+            // ========================================================
+            // UPDATED
+            // ========================================================
+
+            if (ColumnExists(dataReader, "UpdatedOn"))
+            {
+                row.UpdatedOn =
+                    GetNullableDateTimeOffset(
+                        dataReader,
+                        "UpdatedOn");
+            }
+
+            if (ColumnExists(dataReader, "Updatedby"))
+            {
+                row.UpdatedBy =
+                    GetInt64Value(
+                        dataReader,
+                        "Updatedby");
+            }
+
+            if (ColumnExists(
+                dataReader,
+                "UpdatedByName"))
+            {
+                row.UpdatedByName =
+                    GetStringValue(
+                        dataReader,
+                        "UpdatedByName");
+            }
+
+            return row;
+        }
+        private bool ColumnExists(
+    System.Data.IDataReader dataReader,
+    string columnName)
+        {
+            for (int i = 0;
+                 i < dataReader.FieldCount;
+                 i++)
+            {
+                if (string.Equals(
+                    dataReader.GetName(i),
+                    columnName,
+                    StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }
