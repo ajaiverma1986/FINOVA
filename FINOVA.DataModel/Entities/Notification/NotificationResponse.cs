@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FINOVA.DataModel.Wallet;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -146,5 +147,63 @@ namespace FINOVA.DataModel.Entities.Notification
         public string ServiceTypeName { get; set; }
 
         public string? Description { get; set; }
+    }
+    public class ValidateOTPResponse
+    {
+        public bool IsValid { get; set; }
+        public long? OTPID { get; set; }
+        public string? ResultCode { get; set; }
+        public string? Message { get; set; }
+    }
+
+
+    public class ExpireOTPResponse
+    {
+        public long OTPID { get; set; }
+        public bool IsExpired { get; set; }
+        public string? Message { get; set; }
+    }
+    public class ExpireOldOTPResponse
+    {
+        public int ExpiredOTPCount { get; set; }
+    }
+    public class GetOTPResponse
+    {
+        public long OTPID { get; set; }
+        public string? MobileNo { get; set; }
+        public string? OTPSender { get; set; }
+        public string? OTPMessage { get; set; }
+
+        public int Status { get; set; }
+        public string? StatusName { get; set; }
+
+        public DateTime CreatedOn { get; set; }
+        public int Resettime { get; set; }
+
+        public DateTime ExpiryTime { get; set; }
+
+        public bool IsActive { get; set; }
+    }
+    public class GetOTPListResponse
+    {
+        public List<GetOTPResponse> Records { get; set; }
+            = new List<GetOTPResponse>();
+
+        public OTPPagingInfo Paging { get; set; }
+            = new OTPPagingInfo();
+    }
+    public class OTPPagingInfo
+    {
+        public long TotalRecords { get; set; }
+
+        public int TotalPages { get; set; }
+
+        public int PageNumber { get; set; }
+
+        public int PageSize { get; set; }
+
+        public bool HasNextPage { get; set; }
+
+        public bool HasPreviousPage { get; set; }
     }
 }

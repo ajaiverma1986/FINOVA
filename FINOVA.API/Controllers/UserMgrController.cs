@@ -2288,5 +2288,39 @@ namespace FINOVA.API.Controllers
 
             return Json(response);
         }
+        // ============================================================
+        // FORGOT PASSWORD - SEND OTP
+        // ============================================================
+        [HttpPost("ForgotPassword")]
+        public async Task<IActionResult> ForgotPassword(
+            [FromBody] ForgotPasswordRequest request)
+        {
+            SimpleResponse response =
+                new SimpleResponse();
+
+            response =
+                await _Provider.ForgotPassword(
+                    request,
+                    CallerUser);
+
+            return Json(response);
+        }
+        // ============================================================
+        // RESET PASSWORD USING OTP
+        // ============================================================
+        [HttpPost("ResetPassword")]
+        public async Task<IActionResult> ResetPassword(
+            [FromBody] ResetPasswordRequest request)
+        {
+            SimpleResponse response =
+                new SimpleResponse();
+
+            response =
+                await _Provider.ResetUserPassword(
+                    request,
+                    CallerUser);
+
+            return Json(response);
+        }
     }
 }

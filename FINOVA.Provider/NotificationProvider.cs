@@ -3,6 +3,8 @@ using FINOVA.DataModel.Interfaces;
 using FINOVA.DataModel.Shared;
 using FINOVA.Provider.Shared;
 using FINOVA.Repository;
+using System.Net.Mail;
+using System.Net;
 
 namespace FINOVA.Provider
 {
@@ -878,6 +880,724 @@ namespace FINOVA.Provider
             response.Result = result;
 
             return response;
+        }
+        // ============================================================
+        // CREATE OTP
+        // ============================================================
+        public async Task<SimpleResponse> CreateOTP(
+            CreateOTPRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            if (request == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            if (string.IsNullOrWhiteSpace(request.MobileNo) ||
+                string.IsNullOrWhiteSpace(request.OTP))
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            // Normalize
+            request.MobileNo = request.MobileNo.Trim();
+            request.OTP = request.OTP.Trim();
+
+            request.OTPSender =
+                string.IsNullOrWhiteSpace(request.OTPSender)
+                    ? null
+                    : request.OTPSender.Trim();
+
+            request.OTPMessage =
+                string.IsNullOrWhiteSpace(request.OTPMessage)
+                    ? null
+                    : request.OTPMessage.Trim();
+
+            // Validate mobile number
+            if (request.MobileNo.Length != 10 ||
+                !request.MobileNo.All(char.IsDigit))
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            // OTP max length based on VARCHAR(10)
+            if (request.OTP.Length > 10)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            // Sender max length based on VARCHAR(10)
+            if (!string.IsNullOrEmpty(request.OTPSender) &&
+                request.OTPSender.Length > 10)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            // Default OTP validity
+            if (request.Resettime <= 0)
+            {
+                request.Resettime = 5;
+            }
+
+            response.Result =
+                await _repository.CreateOTP(
+                    request,
+                    serviceUser);
+
+            return response;
+        }
+
+
+        // ============================================================
+        // VALIDATE OTP
+        // ============================================================
+        public async Task<SimpleResponse> ValidateOTP(
+            ValidateOTPRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            if (request == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            if (string.IsNullOrWhiteSpace(request.MobileNo) ||
+                string.IsNullOrWhiteSpace(request.OTP))
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            request.MobileNo = request.MobileNo.Trim();
+            request.OTP = request.OTP.Trim();
+
+            // Validate mobile
+            if (request.MobileNo.Length != 10 ||
+                !request.MobileNo.All(char.IsDigit))
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            if (request.OTP.Length > 10)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            response.Result =
+                await _repository.ValidateOTP(
+                    request,
+                    serviceUser);
+
+            return response;
+        }
+
+
+        // ============================================================
+        // EXPIRE OTP
+        // ============================================================
+        public async Task<SimpleResponse> ExpireOTP(
+            long otpID,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            if (otpID <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            response.Result =
+                await _repository.ExpireOTP(
+                    otpID,
+                    serviceUser);
+
+            return response;
+        }
+
+
+        // ============================================================
+        // EXPIRE OLD OTPs
+        // ============================================================
+        public async Task<SimpleResponse> ExpireOldOTPs(
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            response.Result =
+                await _repository.ExpireOldOTPs(
+                    serviceUser);
+
+            return response;
+        }
+
+
+        // ============================================================
+        // GET / SEARCH OTP LIST
+        // ============================================================
+        public async Task<SimpleResponse> GetAllOTPs(
+            GetOTPRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            if (request == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+
+            // ========================================================
+            // OTP ID
+            // ========================================================
+            if (request.OTPID.HasValue &&
+                request.OTPID.Value <= 0)
+            {
+                request.OTPID = null;
+            }
+
+
+            // ========================================================
+            // MOBILE NUMBER
+            // ========================================================
+            request.MobileNo =
+                string.IsNullOrWhiteSpace(request.MobileNo)
+                    ? null
+                    : request.MobileNo.Trim();
+
+            if (!string.IsNullOrEmpty(request.MobileNo))
+            {
+                if (request.MobileNo.Length != 10 ||
+                    !request.MobileNo.All(char.IsDigit))
+                {
+                    response.SetError(ErrorCodes.SP_133);
+                    return response;
+                }
+            }
+
+
+            // ========================================================
+            // OTP SENDER
+            // ========================================================
+            request.OTPSender =
+                string.IsNullOrWhiteSpace(request.OTPSender)
+                    ? null
+                    : request.OTPSender.Trim();
+
+            if (!string.IsNullOrEmpty(request.OTPSender) &&
+                request.OTPSender.Length > 10)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+
+            // ========================================================
+            // DATE RANGE
+            // ========================================================
+            if (request.FromDate.HasValue)
+            {
+                request.FromDate =
+                    request.FromDate.Value.Date;
+            }
+
+            if (request.ToDate.HasValue)
+            {
+                request.ToDate =
+                    request.ToDate.Value.Date;
+            }
+
+            if (request.FromDate.HasValue &&
+                request.ToDate.HasValue &&
+                request.FromDate.Value >
+                request.ToDate.Value)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+
+            // ========================================================
+            // PAGING
+            // ========================================================
+            if (request.PageNumber <= 0)
+            {
+                request.PageNumber = 1;
+            }
+
+            if (request.PageSize <= 0)
+            {
+                request.PageSize = 20;
+            }
+
+            if (request.PageSize > 500)
+            {
+                request.PageSize = 500;
+            }
+
+
+            // ========================================================
+            // CALL REPOSITORY
+            // ========================================================
+            response.Result =
+                await _repository.GetAllOTPs(
+                    request,
+                    serviceUser);
+
+            return response;
+        }
+
+
+        // ============================================================
+        // GET ACTIVE OTP BY MOBILE NUMBER
+        // ============================================================
+        public async Task<SimpleResponse> GetActiveOTPByMobile(
+            string mobileNo,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            if (string.IsNullOrWhiteSpace(mobileNo))
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            mobileNo = mobileNo.Trim();
+
+            if (mobileNo.Length != 10 ||
+                !mobileNo.All(char.IsDigit))
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            response.Result =
+                await _repository.GetActiveOTPByMobile(
+                    mobileNo,
+                    serviceUser);
+
+            return response;
+        }
+        // ============================================================
+        // GENERIC EMAIL SENDER
+        // ============================================================
+        public async Task<SimpleResponse> SendEmail(
+            string toEmail,
+            string templateName,
+            Dictionary<string, string>? templateInputs,
+            IFINOVAServiceUser serviceUser,
+            List<string>? ccEmails = null,
+            List<string>? bccEmails = null,
+            List<Attachment>? attachments = null)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            try
+            {
+                // ====================================================
+                // 1. VALIDATE REQUIRED INPUT
+                // ====================================================
+                if (string.IsNullOrWhiteSpace(toEmail))
+                {
+                    response.SetError(ErrorCodes.SP_133);
+                    return response;
+                }
+
+                if (string.IsNullOrWhiteSpace(templateName))
+                {
+                    response.SetError(ErrorCodes.SP_133);
+                    return response;
+                }
+
+                toEmail = toEmail.Trim();
+                templateName = templateName.Trim();
+
+
+                // ====================================================
+                // 2. VALIDATE TO EMAIL
+                // ====================================================
+                if (!IsValidEmail(toEmail))
+                {
+                    response.SetError(ErrorCodes.SP_133);
+                    return response;
+                }
+
+
+                // ====================================================
+                // 3. VALIDATE CC EMAILS
+                // ====================================================
+                if (ccEmails != null)
+                {
+                    foreach (var email in ccEmails)
+                    {
+                        if (string.IsNullOrWhiteSpace(email) ||
+                            !IsValidEmail(email.Trim()))
+                        {
+                            response.SetError(ErrorCodes.SP_133);
+                            return response;
+                        }
+                    }
+                }
+
+
+                // ====================================================
+                // 4. VALIDATE BCC EMAILS
+                // ====================================================
+                if (bccEmails != null)
+                {
+                    foreach (var email in bccEmails)
+                    {
+                        if (string.IsNullOrWhiteSpace(email) ||
+                            !IsValidEmail(email.Trim()))
+                        {
+                            response.SetError(ErrorCodes.SP_133);
+                            return response;
+                        }
+                    }
+                }
+
+
+                // ====================================================
+                // 5. GET ACTIVE EMAIL GATEWAY
+                // ====================================================
+                var emailGateway =
+                    await _repository.GetActiveEmailGateway(
+                        serviceUser);
+
+
+                // ====================================================
+                // 6. ACTIVE EMAIL GATEWAY MUST EXIST
+                // ====================================================
+                if (emailGateway == null)
+                {
+                    response.SetError(ErrorCodes.SP_133);
+                    return response;
+                }
+
+
+                // ====================================================
+                // 7. VALIDATE ACTIVE EMAIL GATEWAY CONFIGURATION
+                // ====================================================
+                if (string.IsNullOrWhiteSpace(
+                        emailGateway.SMTPServer))
+                {
+                    response.SetError(ErrorCodes.SP_133);
+                    return response;
+                }
+
+                if (emailGateway.SMTPPort <= 0)
+                {
+                    response.SetError(ErrorCodes.SP_133);
+                    return response;
+                }
+
+                if (string.IsNullOrWhiteSpace(
+                        emailGateway.SMTPUsername))
+                {
+                    response.SetError(ErrorCodes.SP_133);
+                    return response;
+                }
+
+                if (string.IsNullOrWhiteSpace(
+                        emailGateway.SMTPPassword))
+                {
+                    response.SetError(ErrorCodes.SP_133);
+                    return response;
+                }
+
+                if (string.IsNullOrWhiteSpace(
+                        emailGateway.SMTPSenderEmail))
+                {
+                    response.SetError(ErrorCodes.SP_133);
+                    return response;
+                }
+
+                if (!IsValidEmail(
+                        emailGateway.SMTPSenderEmail))
+                {
+                    response.SetError(ErrorCodes.SP_133);
+                    return response;
+                }
+
+                if (string.IsNullOrWhiteSpace(
+                        emailGateway.SMTPSenderName))
+                {
+                    response.SetError(ErrorCodes.SP_133);
+                    return response;
+                }
+
+
+                // ====================================================
+                // 8. GET ONLY ACTIVE TEMPLATE
+                // ====================================================
+                GetActiveTemplateRequest templateRequest =
+                    new GetActiveTemplateRequest
+                    {
+                        TemplateName = templateName
+                    };
+
+
+                var templates =
+                    await _repository.GetActiveTemplates(
+                        templateRequest,
+                        serviceUser);
+
+
+                // ====================================================
+                // 9. ACTIVE TEMPLATE MUST EXIST
+                // ====================================================
+                if (templates == null ||
+                    templates.Count == 0)
+                {
+                    response.SetError(ErrorCodes.SP_133);
+                    return response;
+                }
+
+
+                // ====================================================
+                // 10. GET TEMPLATE
+                // ====================================================
+                var template =
+                    templates.FirstOrDefault(x =>
+                        !string.IsNullOrWhiteSpace(
+                            x.TemplateName) &&
+                        x.TemplateName.Equals(
+                            templateName,
+                            StringComparison.OrdinalIgnoreCase));
+
+
+                if (template == null)
+                {
+                    response.SetError(ErrorCodes.SP_133);
+                    return response;
+                }
+
+
+                if (string.IsNullOrWhiteSpace(
+                        template.TemplateMsg))
+                {
+                    response.SetError(ErrorCodes.SP_133);
+                    return response;
+                }
+
+
+                // ====================================================
+                // 11. PREPARE EMAIL SUBJECT
+                // ====================================================
+                // Currently TemplateMaster does not have separate
+                // Subject column, therefore TemplateName is used.
+                string subject =
+                    template.TemplateName ?? templateName;
+
+
+                // ====================================================
+                // 12. PREPARE HTML BODY
+                // ====================================================
+                string emailBody =
+                    template.TemplateMsg;
+
+
+                // ====================================================
+                // 13. REPLACE TEMPLATE INPUTS
+                //
+                // Example:
+                // {{UserName}} -> Ajai
+                // {{OTP}} -> 458921
+                // {{Amount}} -> 5000
+                // ====================================================
+                if (templateInputs != null)
+                {
+                    foreach (var item in templateInputs)
+                    {
+                        string key =
+                            "{{" + item.Key + "}}";
+
+                        string value =
+                            item.Value ?? string.Empty;
+
+
+                        emailBody =
+                            emailBody.Replace(
+                                key,
+                                value,
+                                StringComparison.OrdinalIgnoreCase);
+
+
+                        subject =
+                            subject.Replace(
+                                key,
+                                value,
+                                StringComparison.OrdinalIgnoreCase);
+                    }
+                }
+
+
+                // ====================================================
+                // 14. CREATE MAIL MESSAGE
+                // ====================================================
+                using MailMessage mailMessage =
+                    new MailMessage();
+
+
+                // ====================================================
+                // FROM
+                // ====================================================
+                mailMessage.From =
+                    new MailAddress(
+                        emailGateway.SMTPSenderEmail,
+                        emailGateway.SMTPSenderName);
+
+
+                // ====================================================
+                // TO
+                // ====================================================
+                mailMessage.To.Add(
+                    new MailAddress(toEmail));
+
+
+                // ====================================================
+                // CC - OPTIONAL
+                // ====================================================
+                if (ccEmails != null)
+                {
+                    foreach (var cc in ccEmails)
+                    {
+                        if (!string.IsNullOrWhiteSpace(cc))
+                        {
+                            mailMessage.CC.Add(
+                                new MailAddress(
+                                    cc.Trim()));
+                        }
+                    }
+                }
+
+
+                // ====================================================
+                // BCC - OPTIONAL
+                // ====================================================
+                if (bccEmails != null)
+                {
+                    foreach (var bcc in bccEmails)
+                    {
+                        if (!string.IsNullOrWhiteSpace(bcc))
+                        {
+                            mailMessage.Bcc.Add(
+                                new MailAddress(
+                                    bcc.Trim()));
+                        }
+                    }
+                }
+
+
+                // ====================================================
+                // SUBJECT
+                // ====================================================
+                mailMessage.Subject = subject;
+
+
+                // ====================================================
+                // HTML BODY
+                // ====================================================
+                mailMessage.Body = emailBody;
+
+                mailMessage.IsBodyHtml = true;
+
+
+                // ====================================================
+                // 15. ATTACHMENTS - OPTIONAL
+                // ====================================================
+                if (attachments != null &&
+                    attachments.Count > 0)
+                {
+                    foreach (var attachment in attachments)
+                    {
+                        if (attachment != null)
+                        {
+                            mailMessage.Attachments.Add(
+                                attachment);
+                        }
+                    }
+                }
+
+
+                // ====================================================
+                // 16. SMTP CLIENT
+                // ====================================================
+                using SmtpClient smtpClient =
+                    new SmtpClient(
+                        emailGateway.SMTPServer,
+                        emailGateway.SMTPPort);
+
+
+                smtpClient.UseDefaultCredentials = false;
+
+
+                smtpClient.Credentials =
+                    new NetworkCredential(
+                        emailGateway.SMTPUsername,
+                        emailGateway.SMTPPassword);
+
+
+                smtpClient.EnableSsl =
+                    emailGateway.SMTPEnableSSL;
+
+
+                // ====================================================
+                // 17. SEND EMAIL
+                // ====================================================
+                await smtpClient.SendMailAsync(
+                    mailMessage);
+
+
+                // ====================================================
+                // 18. SUCCESS
+                // ====================================================
+                response.Result = true;
+
+                return response;
+            }
+            catch
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+        }
+
+
+        // ============================================================
+        // EMAIL VALIDATION
+        // ============================================================
+        private bool IsValidEmail(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return false;
+
+            try
+            {
+                MailAddress mailAddress =
+                    new MailAddress(email);
+
+                return mailAddress.Address.Equals(
+                    email,
+                    StringComparison.OrdinalIgnoreCase);
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

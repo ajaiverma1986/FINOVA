@@ -181,4 +181,12 @@ namespace FINOVA.DataModel.UserMgr
 
         public byte ApplicationID { get; set; }
     }
+    public class ResetUserPasswordResponse
+    {
+        public bool IsPasswordReset { get; set; }
+
+        public long UserMasterID { get; set; }
+
+        public string? Message { get; set; }
+    }
 }

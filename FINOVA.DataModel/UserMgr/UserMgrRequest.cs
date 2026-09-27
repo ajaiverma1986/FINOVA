@@ -356,4 +356,18 @@ namespace FINOVA.DataModel.UserMgr
 
         public byte ApplicationID { get; set; }
     }
+    public class ForgotPasswordRequest
+    {
+        public string UserCode { get; set; }
+    }
+    public class ResetPasswordRequest
+    {
+        public string UserCode { get; set; }
+
+        public string OTP { get; set; }
+
+        public string NewPassword { get; set; }
+
+        public string ConfirmPassword { get; set; }
+    }
 }

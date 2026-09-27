@@ -1585,5 +1585,388 @@ namespace FINOVA.Repository
 
             return row;
         }
+        // ============================================================
+        // CREATE OTP
+        // ============================================================
+        public async Task<long> CreateOTP(
+            CreateOTPRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            long outputId = 0;
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[NOTI].[OTP_Create]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@MobileNo",
+                request.MobileNo);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@OTP",
+                request.OTP);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@OTPSender",
+                request.OTPSender);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@OTPMessage",
+                request.OTPMessage);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@Resettime",
+                request.Resettime);
+
+            _database.AddOutParameter(
+                dbCommand,
+                "@Out_ID",
+                OUTPARAMETER_SIZE);
+
+            await _database.ExecuteNonQueryAsync(
+                dbCommand);
+
+            outputId =
+                GetIDOutputLong(dbCommand);
+
+            return outputId;
+        }
+        // ============================================================
+        // VALIDATE OTP
+        // ============================================================
+        public async Task<ValidateOTPResponse> ValidateOTP(
+            ValidateOTPRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            ValidateOTPResponse response =
+                new ValidateOTPResponse();
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[NOTI].[OTP_Validate]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@MobileNo",
+                request.MobileNo);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@OTP",
+                request.OTP);
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(dbCommand))
+            {
+                if (dataReader.Read())
+                {
+                    response.IsValid =
+                        Convert.ToBoolean(
+                            dataReader["IsValid"]);
+
+                    response.OTPID =
+                        dataReader["OTPID"] == DBNull.Value
+                            ? null
+                            : Convert.ToInt64(
+                                dataReader["OTPID"]);
+
+                    response.ResultCode =
+                        GetStringValue(
+                            dataReader,
+                            "ResultCode");
+
+                    response.Message =
+                        GetStringValue(
+                            dataReader,
+                            "Message");
+                }
+            }
+
+            return response;
+        }
+        // ============================================================
+        // EXPIRE OTP
+        // ============================================================
+        public async Task<ExpireOTPResponse> ExpireOTP(
+            long otpID,
+            IFINOVAServiceUser serviceUser)
+        {
+            ExpireOTPResponse response =
+                new ExpireOTPResponse();
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[NOTI].[OTP_Expire]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@OTPID",
+                otpID);
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(dbCommand))
+            {
+                if (dataReader.Read())
+                {
+                    response.OTPID =
+                        GetInt64Value(
+                            dataReader,
+                            "OTPID").Value;
+
+                    response.IsExpired =
+                        Convert.ToBoolean(
+                            dataReader["IsExpired"]);
+
+                    response.Message =
+                        GetStringValue(
+                            dataReader,
+                            "Message");
+                }
+            }
+
+            return response;
+        }
+        // ============================================================
+        // EXPIRE OLD OTPs
+        // ============================================================
+        public async Task<ExpireOldOTPResponse> ExpireOldOTPs(
+            IFINOVAServiceUser serviceUser)
+        {
+            ExpireOldOTPResponse response =
+                new ExpireOldOTPResponse();
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[NOTI].[OTP_ExpireOld]");
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(dbCommand))
+            {
+                if (dataReader.Read())
+                {
+                    response.ExpiredOTPCount =
+                        GetInt32Value(
+                            dataReader,
+                            "ExpiredOTPCount").Value;
+                }
+            }
+
+            return response;
+        }
+        // ============================================================
+        // GET / SEARCH OTP LIST
+        // ============================================================
+        public async Task<GetOTPListResponse> GetAllOTPs(
+            GetOTPRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            GetOTPListResponse response =
+                new GetOTPListResponse();
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[NOTI].[OTP_GetAll]");
+
+
+            _database.AddInParameter(
+                dbCommand,
+                "@OTPID",
+                request.OTPID);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@MobileNo",
+                request.MobileNo);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@OTPSender",
+                request.OTPSender);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@Status",
+                request.Status);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@FromDate",
+                request.FromDate);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@ToDate",
+                request.ToDate);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@PageNumber",
+                request.PageNumber);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@PageSize",
+                request.PageSize);
+
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(dbCommand))
+            {
+                // ====================================================
+                // RESULT SET 1 : OTP RECORDS
+                // ====================================================
+                while (dataReader.Read())
+                {
+                    GetOTPResponse row =
+                        MapOTP(dataReader);
+
+                    response.Records.Add(row);
+                }
+
+
+                // ====================================================
+                // RESULT SET 2 : PAGING
+                // ====================================================
+                if (dataReader.NextResult() &&
+                    dataReader.Read())
+                {
+                    response.Paging.TotalRecords =
+                        GetInt64Value(
+                            dataReader,
+                            "TotalRecords").Value;
+
+                    response.Paging.TotalPages =
+                        GetInt32Value(
+                            dataReader,
+                            "TotalPages").Value;
+
+                    response.Paging.PageNumber =
+                        GetInt32Value(
+                            dataReader,
+                            "PageNumber").Value;
+
+                    response.Paging.PageSize =
+                        GetInt32Value(
+                            dataReader,
+                            "PageSize").Value;
+
+                    response.Paging.HasNextPage =
+                        Convert.ToBoolean(
+                            dataReader["HasNextPage"]);
+
+                    response.Paging.HasPreviousPage =
+                        Convert.ToBoolean(
+                            dataReader["HasPreviousPage"]);
+                }
+            }
+
+            return response;
+        }
+        // ============================================================
+        // GET ACTIVE OTP BY MOBILE
+        // ============================================================
+        public async Task<GetOTPResponse?> GetActiveOTPByMobile(
+            string mobileNo,
+            IFINOVAServiceUser serviceUser)
+        {
+            GetOTPResponse? response = null;
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[NOTI].[OTP_GetActiveByMobile]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@MobileNo",
+                mobileNo);
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(dbCommand))
+            {
+                if (dataReader.Read())
+                {
+                    response =
+                        MapOTP(dataReader);
+                }
+            }
+
+            return response;
+        }
+        // ============================================================
+        // MAP OTP
+        // ============================================================
+        private GetOTPResponse MapOTP(
+            System.Data.IDataReader dataReader)
+        {
+            GetOTPResponse row =
+                new GetOTPResponse();
+
+
+            row.OTPID =
+                GetInt64Value(
+                    dataReader,
+                    "OTPID").Value;
+
+
+            row.MobileNo =
+                GetStringValue(
+                    dataReader,
+                    "MobileNo");
+
+
+            row.OTPSender =
+                GetStringValue(
+                    dataReader,
+                    "OTPSender");
+
+
+            row.OTPMessage =
+                GetStringValue(
+                    dataReader,
+                    "OTPMessage");
+
+
+            row.Status =
+                GetInt32Value(
+                    dataReader,
+                    "Status").Value;
+
+
+            row.StatusName =
+                GetStringValue(
+                    dataReader,
+                    "StatusName");
+
+
+            row.CreatedOn =
+                GetDateTimeValue(
+                    dataReader,
+                    "CreatedOn").Value;
+
+
+            row.Resettime =
+                GetInt32Value(
+                    dataReader,
+                    "Resettime").Value;
+
+
+            row.ExpiryTime =
+                GetDateTimeValue(
+                    dataReader,
+                    "ExpiryTime").Value;
+
+
+            row.IsActive =
+                Convert.ToBoolean(
+                    dataReader["IsActive"]);
+
+
+            return row;
+        }
     }
 }

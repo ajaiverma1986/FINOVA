@@ -136,4 +136,32 @@ namespace FINOVA.DataModel.Entities.Notification
 
         public int Status { get; set; }
     }
+    public class CreateOTPRequest
+    {
+        public string MobileNo { get; set; }
+        public string OTP { get; set; }
+        public string? OTPSender { get; set; }
+        public string? OTPMessage { get; set; }
+        public int Resettime { get; set; } = 5;
+    }
+
+
+    public class ValidateOTPRequest
+    {
+        public string MobileNo { get; set; }
+        public string OTP { get; set; }
+    }
+    public class GetOTPRequest
+    {
+        public long? OTPID { get; set; }
+        public string? MobileNo { get; set; }
+        public string? OTPSender { get; set; }
+        public int? Status { get; set; }
+        public DateTime? FromDate { get; set; }
+        public DateTime? ToDate { get; set; }
+
+        public int PageNumber { get; set; } = 1;
+        public int PageSize { get; set; } = 20;
+    }
+
 }

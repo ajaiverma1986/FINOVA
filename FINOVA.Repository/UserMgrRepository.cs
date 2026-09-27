@@ -3145,5 +3145,68 @@ namespace FINOVA.Repository
 
             return false;
         }
+        // ============================================================
+        // USER MASTER - RESET PASSWORD
+        // ============================================================
+        public async Task<ResetUserPasswordResponse>
+            ResetUserPassword(
+                long userMasterID,
+                string password,
+                IFINOVAServiceUser serviceUser)
+        {
+            ResetUserPasswordResponse response =
+                new ResetUserPasswordResponse();
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[USR].[UserMasters_ResetPassword]");
+
+
+            // ========================================================
+            // USER MASTER ID
+            // ========================================================
+            _database.AddInParameter(
+                dbCommand,
+                "@UserMasterID",
+                userMasterID);
+
+
+            // ========================================================
+            // PASSWORD
+            // Password should already be hashed/encrypted by provider
+            // ========================================================
+            _database.AddInParameter(
+                dbCommand,
+                "@Password",
+                password);
+
+
+            // ========================================================
+            // EXECUTE
+            // ========================================================
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(dbCommand))
+            {
+                if (dataReader.Read())
+                {
+                    response.IsPasswordReset =
+                        dataReader["IsPasswordReset"] != DBNull.Value &&
+                        Convert.ToBoolean(
+                            dataReader["IsPasswordReset"]);
+
+                    response.UserMasterID =
+                        GetInt64Value(
+                            dataReader,
+                            "UserMasterID").Value;
+
+                    response.Message =
+                        GetStringValue(
+                            dataReader,
+                            "Message");
+                }
+            }
+
+            return response;
+        }
     }
 }

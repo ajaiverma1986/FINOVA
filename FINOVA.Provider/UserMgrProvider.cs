@@ -1,4 +1,5 @@
-﻿using FINOVA.DataModel.Interfaces;
+﻿using FINOVA.DataModel.Entities.Notification;
+using FINOVA.DataModel.Interfaces;
 using FINOVA.DataModel.Shared;
 using FINOVA.DataModel.UserMgr;
 using FINOVA.Provider.Shared;
@@ -10,10 +11,12 @@ namespace FINOVA.Provider
    public class UserMgrProvider: BaseProvider
     {
         public readonly UserMgrRepository _repository = null;
+        public readonly NotificationProvider _notificationProvider = null;
        
         public UserMgrProvider()
         {
             _repository = new UserMgrRepository();
+            _notificationProvider = new NotificationProvider();
         }
         // ============================================================
         // USER MASTER - CREATE
@@ -49,6 +52,25 @@ namespace FINOVA.Provider
                 await _repository.CreateUserMaster(
                     request, pwd,
                     serviceUser);
+            if (Convert.ToInt64(response.Result) > 0)
+            {
+
+                var inputs =
+                            new Dictionary<string, string>
+                            {
+                                { "UserName", "Ajai" },
+                                { "OTP", "458921" },
+                                { "ExpiryMinutes", "5" }
+                            };
+
+
+                SimpleResponse result = await _notificationProvider.SendEmail(
+                        "ajaibit@gmail.com",
+                        "Forget Password OTP",
+                        inputs,
+                        serviceUser);
+
+            }
 
             return response;
         }
@@ -1518,6 +1540,513 @@ namespace FINOVA.Provider
                     userMasterID,
                     applicationID,
                     serviceUser);
+
+            return response;
+        }
+        // ============================================================
+        // FORGOT PASSWORD - SEND OTP
+        // ============================================================
+        public async Task<SimpleResponse> ForgotPassword(
+            ForgotPasswordRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            // ========================================================
+            // 1. VALIDATE REQUEST
+            // ========================================================
+            if (request == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            if (string.IsNullOrWhiteSpace(request.UserCode))
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            request.UserCode = request.UserCode.Trim();
+
+
+            // ========================================================
+            // 2. VALIDATE USER CODE
+            // ========================================================
+            SimpleResponse userResponse =
+                await GetUserMasterByUserName(
+                    request.UserCode,
+                    serviceUser);
+
+            if (userResponse == null ||
+                userResponse.Result == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+
+            // ========================================================
+            // 3. GET USER
+            // ========================================================
+            var user =
+                userResponse.Result as GetUserMasterResponse;
+
+            if (user == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+
+            // ========================================================
+            // 4. VALIDATE REGISTERED EMAIL
+            // ========================================================
+            if (string.IsNullOrWhiteSpace(user.EmailId))
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+
+            // ========================================================
+            // 5. GENERATE SECURE 6-DIGIT OTP
+            // ========================================================
+            string otp =
+                System.Security.Cryptography
+                    .RandomNumberGenerator
+                    .GetInt32(100000, 1000000)
+                    .ToString();
+
+
+            // ========================================================
+            // 6. SAVE OTP
+            // ========================================================
+            // IMPORTANT:
+            // Your current OTP table is MobileNo based.
+            //
+            // For forgot-password email OTP, I recommend storing:
+            // UserMasterID / UserCode / Email / OTP / Expiry.
+            //
+            // Call your email OTP save method here once added.
+            // Do NOT skip persistence because OTP must later be verified.
+
+
+            // ========================================================
+            // 7. TEMPLATE INPUTS
+            // ========================================================
+            Dictionary<string, string> templateInputs =
+                new Dictionary<string, string>
+                {
+            {
+                "UserName",
+                user.UserName ?? request.UserCode
+            },
+            {
+                "OTP",
+                otp
+            },
+            {
+                "ExpiryMinutes",
+                "5"
+            }
+                };
+
+
+            // ========================================================
+            // 8. SEND OTP EMAIL
+            // ========================================================
+            NotificationProvider notificationProvider =
+                new NotificationProvider();
+
+            //SimpleResponse emailResponse =
+            //    await notificationProvider.SendEmail(
+            //        user.EmailId,
+            //        "Forgot Password OTP",
+            //        templateInputs,
+            //        serviceUser);
+
+
+            //// ========================================================
+            //// 9. CHECK EMAIL RESULT
+            //// ========================================================
+            //if (emailResponse == null ||
+            //    emailResponse.Result == null)
+            //{
+            //    response.SetError(ErrorCodes.SP_133);
+            //    return response;
+            //}
+
+            // save otp in otp master
+
+            CreateOTPRequest oTPRequest = new CreateOTPRequest
+            {
+                MobileNo = user.MobileNo,
+                OTP = otp,
+                OTPSender = "EMAIL",
+                OTPMessage = "",
+                Resettime = 15
+            };
+            SimpleResponse result2 = await _notificationProvider.CreateOTP(oTPRequest,serviceUser);
+            // ========================================================
+            // 10. SUCCESS
+            // ========================================================
+            response.Result = new
+            {
+                IsOTPSent = true,
+
+                Message =
+                    "OTP has been sent to your registered email address."
+            };
+
+            return response;
+        }
+        // ============================================================
+        // RESET PASSWORD USING OTP
+        // ============================================================
+        public async Task<SimpleResponse> ResetPassword(
+            ResetPasswordRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            // ========================================================
+            // 1. VALIDATE REQUEST
+            // ========================================================
+            if (request == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            if (string.IsNullOrWhiteSpace(request.UserCode) ||
+                string.IsNullOrWhiteSpace(request.OTP) ||
+                string.IsNullOrWhiteSpace(request.NewPassword) ||
+                string.IsNullOrWhiteSpace(request.ConfirmPassword))
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            request.UserCode = request.UserCode.Trim();
+            request.OTP = request.OTP.Trim();
+
+
+            // ========================================================
+            // 2. VALIDATE 6-DIGIT OTP FORMAT
+            // ========================================================
+            if (request.OTP.Length != 6 ||
+                !request.OTP.All(char.IsDigit))
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+
+            // ========================================================
+            // 3. VALIDATE PASSWORD / CONFIRM PASSWORD
+            // ========================================================
+            if (request.NewPassword !=
+                request.ConfirmPassword)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            if (request.NewPassword.Length < 8)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+
+            // ========================================================
+            // 4. GET USER BY USER CODE
+            // ========================================================
+            SimpleResponse userResponse =
+                await GetUserMasterByUserName(
+                    request.UserCode,
+                    serviceUser);
+
+            if (userResponse == null ||
+                userResponse.Result == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+
+            var user =
+                userResponse.Result as GetUserMasterResponse;
+
+            if (user == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+
+            // ========================================================
+            // 5. VALIDATE REGISTERED MOBILE
+            // ========================================================
+            if (string.IsNullOrWhiteSpace(user.MobileNo))
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+
+            // ========================================================
+            // 6. VALIDATE OTP USING EXISTING OTP PROVIDER
+            // ========================================================
+            NotificationProvider notificationProvider =
+                new NotificationProvider();
+
+            ValidateOTPRequest otpRequest =
+                new ValidateOTPRequest
+                {
+                    MobileNo = user.MobileNo,
+                    OTP = request.OTP
+                };
+
+
+            SimpleResponse otpResponse =
+                await notificationProvider.ValidateOTP(
+                    otpRequest,
+                    serviceUser);
+
+
+            // ========================================================
+            // 7. CHECK OTP RESPONSE
+            // ========================================================
+            if (otpResponse == null ||
+                otpResponse.Result == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+
+            ValidateOTPResponse otpResult =
+                otpResponse.Result as ValidateOTPResponse;
+
+
+            if (otpResult == null ||
+                !otpResult.IsValid)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+
+            // ========================================================
+            // 8. UPDATE USER PASSWORD
+            // ========================================================
+            // Use your existing password update repository/provider
+            // method here.
+            //
+            // IMPORTANT:
+            // Store password using the same hashing mechanism already
+            // used by your Login/Create User implementation.
+            //
+            // Example:
+            //
+            // response =
+            //     await UpdateUserPassword(
+            //         user.UserMasterID,
+            //         request.NewPassword,
+            //         serviceUser);
+
+
+            // ========================================================
+            // 9. SUCCESS
+            // ========================================================
+            response.Result = new
+            {
+                IsPasswordReset = true,
+                Message = "Password reset successfully."
+            };
+
+            return response;
+        }
+        // ============================================================
+        // USER MASTER - RESET PASSWORD
+        // ============================================================
+        public async Task<SimpleResponse> ResetUserPassword(
+            ResetPasswordRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            // ========================================================
+            // 1. VALIDATE REQUEST
+            // ========================================================
+            if (request == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            if (string.IsNullOrWhiteSpace(request.UserCode) ||
+                string.IsNullOrWhiteSpace(request.OTP) ||
+                string.IsNullOrWhiteSpace(request.NewPassword) ||
+                string.IsNullOrWhiteSpace(request.ConfirmPassword))
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            request.UserCode = request.UserCode.Trim();
+            request.OTP = request.OTP.Trim();
+
+
+            // ========================================================
+            // 2. VALIDATE OTP FORMAT
+            // ========================================================
+            if (request.OTP.Length != 6 ||
+                !request.OTP.All(char.IsDigit))
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+
+            // ========================================================
+            // 3. VALIDATE PASSWORD
+            // ========================================================
+            if (request.NewPassword != request.ConfirmPassword)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            if (request.NewPassword.Length < 8)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+
+            // ========================================================
+            // 4. GET USER BY USER CODE
+            // ========================================================
+            GetUserMasterResponse? user =
+                await _repository.GetUserMasterByUserName(
+                    request.UserCode,
+                    serviceUser);
+
+            if (user == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+
+            // ========================================================
+            // 5. VALIDATE USER STATUS
+            // ========================================================
+            if (user.Status != 8)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+
+            // ========================================================
+            // 6. VALIDATE MOBILE NUMBER
+            // Existing OTP validation uses MobileNo
+            // ========================================================
+            if (string.IsNullOrWhiteSpace(user.MobileNo))
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+
+            // ========================================================
+            // 7. VALIDATE OTP
+            // ========================================================
+            NotificationProvider notificationProvider =
+                new NotificationProvider();
+
+            ValidateOTPRequest otpRequest =
+                new ValidateOTPRequest
+                {
+                    MobileNo = user.MobileNo,
+                    OTP = request.OTP
+                };
+
+
+            SimpleResponse otpResponse =
+                await notificationProvider.ValidateOTP(
+                    otpRequest,
+                    serviceUser);
+
+
+            if (otpResponse == null ||
+                otpResponse.Result == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+
+            ValidateOTPResponse? otpResult =
+                otpResponse.Result as ValidateOTPResponse;
+
+
+            if (otpResult == null ||
+                !otpResult.IsValid)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+
+            // ========================================================
+            // 8. HASH / ENCRYPT NEW PASSWORD
+            // ========================================================
+            //
+            // IMPORTANT:
+            // Use EXACTLY the same method currently used by your
+            // CreateUserMaster / ChangeUserPassword provider.
+            //
+            // Replace this line with your existing password method.
+            //
+            string password = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+
+            // Example only:
+            //
+            // string password =
+            //     PasswordHelper.HashPassword(
+            //         request.NewPassword);
+
+
+            // ========================================================
+            // 9. RESET PASSWORD
+            // ========================================================
+            ResetUserPasswordResponse resetResult =
+                await _repository.ResetUserPassword(
+                    user.UserMasterID,
+                    password,
+                    serviceUser);
+
+
+            // ========================================================
+            // 10. CHECK RESET RESULT
+            // ========================================================
+            if (resetResult == null ||
+                !resetResult.IsPasswordReset)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+
+            // ========================================================
+            // 11. SUCCESS
+            // ========================================================
+            response.Result = resetResult;
 
             return response;
         }
