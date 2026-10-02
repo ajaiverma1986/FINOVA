@@ -771,5 +771,210 @@ namespace FINOVA.Provider
 
             return response;
         }
+        // ============================================================
+        // CODE PREFIX MASTER - CREATE
+        // ============================================================
+        public async Task<SimpleResponse> CreateCodePrefix(
+            CreateCodePrefixRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            if (request == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            if (request.OrganizationId <= 0 ||
+                request.ApplicationId <= 0 ||
+                string.IsNullOrWhiteSpace(request.CodePrefix) ||
+                string.IsNullOrWhiteSpace(request.CodeLngth))
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            request.CodePrefix = request.CodePrefix.Trim();
+            request.CodeLngth = request.CodeLngth.Trim();
+
+            if (request.CodePrefix.Length > 10 ||
+                request.CodeLngth.Length > 20)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            if (request.Status < 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            response.Result =
+                await _repository.CreateCodePrefix(
+                    request,
+                    serviceUser);
+
+            return response;
+        }
+
+
+        // ============================================================
+        // CODE PREFIX MASTER - UPDATE
+        // ============================================================
+        public async Task<SimpleResponse> UpdateCodePrefix(
+            UpdateCodePrefixRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            if (request == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            if (request.Id <= 0 ||
+                request.OrganizationId <= 0 ||
+                request.ApplicationId <= 0 ||
+                string.IsNullOrWhiteSpace(request.CodePrefix) ||
+                string.IsNullOrWhiteSpace(request.CodeLngth))
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            request.CodePrefix = request.CodePrefix.Trim();
+            request.CodeLngth = request.CodeLngth.Trim();
+
+            if (request.CodePrefix.Length > 10 ||
+                request.CodeLngth.Length > 20)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            if (request.Status < 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            response.Result =
+                await _repository.UpdateCodePrefix(
+                    request,
+                    serviceUser);
+
+            return response;
+        }
+
+
+        // ============================================================
+        // CODE PREFIX MASTER - DELETE
+        // ============================================================
+        public async Task<SimpleResponse> DeleteCodePrefix(
+            int id,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            if (id <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            response.Result =
+                await _repository.DeleteCodePrefix(
+                    id,
+                    serviceUser);
+
+            return response;
+        }
+
+
+        // ============================================================
+        // CODE PREFIX MASTER - GET / GET ALL
+        // ============================================================
+        public async Task<SimpleResponse> GetCodePrefixes(
+            GetCodePrefixRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            if (request == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            // Invalid optional Id -> remove filter
+            if (request.Id.HasValue &&
+                request.Id.Value <= 0)
+            {
+                request.Id = null;
+            }
+
+            // Invalid optional OrganizationId -> remove filter
+            if (request.OrganizationId.HasValue &&
+                request.OrganizationId.Value <= 0)
+            {
+                request.OrganizationId = null;
+            }
+
+            // Invalid optional ApplicationId -> remove filter
+            if (request.ApplicationId.HasValue &&
+                request.ApplicationId.Value <= 0)
+            {
+                request.ApplicationId = null;
+            }
+
+            request.CodePrefix =
+                string.IsNullOrWhiteSpace(request.CodePrefix)
+                    ? null
+                    : request.CodePrefix.Trim();
+
+            if (!string.IsNullOrEmpty(request.CodePrefix) &&
+                request.CodePrefix.Length > 10)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            response.Result =
+                await _repository.GetCodePrefixes(
+                    request,
+                    serviceUser);
+
+            return response;
+        }
+
+
+        // ============================================================
+        // CODE PREFIX MASTER - GET ACTIVE
+        // ============================================================
+        public async Task<SimpleResponse> GetActiveCodePrefix(
+            int organizationId,
+            int applicationId,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            if (organizationId <= 0 ||
+                applicationId <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            response.Result =
+                await _repository.GetActiveCodePrefix(
+                    organizationId,
+                    applicationId,
+                    serviceUser);
+
+            return response;
+        }
     }
 }

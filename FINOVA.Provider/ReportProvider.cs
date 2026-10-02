@@ -462,5 +462,190 @@ namespace FINOVA.Provider
 
             return response;
         }
+        // ============================================================
+        // USER MASTER - LIST REPORT
+        // ============================================================
+        public async Task<SimpleResponse> GetUserMasterListReport(
+            UserMasterListReportRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            // ========================================================
+            // 1. VALIDATE REQUEST
+            // ========================================================
+            if (request == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+
+            // ========================================================
+            // 2. VALIDATE DATE RANGE
+            // ========================================================
+            if (request.FromDate.HasValue &&
+                request.ToDate.HasValue &&
+                request.FromDate.Value.Date > request.ToDate.Value.Date)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+
+            // ========================================================
+            // 3. VALIDATE OPTIONAL FILTERS
+            // ========================================================
+            if (request.Status.HasValue &&
+                request.Status.Value < 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            if (request.UserTypeId.HasValue &&
+                request.UserTypeId.Value <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            if (request.ParentId.HasValue &&
+                request.ParentId.Value <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+
+            // ========================================================
+            // 4. CLEAN FREE TEXT SEARCH
+            // ========================================================
+            request.FreeTextSearch =
+                string.IsNullOrWhiteSpace(request.FreeTextSearch)
+                    ? null
+                    : request.FreeTextSearch.Trim();
+
+            if (!string.IsNullOrEmpty(request.FreeTextSearch) &&
+                request.FreeTextSearch.Length > 200)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+
+            // ========================================================
+            // 5. PAGING
+            // ========================================================
+            if (request.PageNumber <= 0)
+            {
+                request.PageNumber = 1;
+            }
+
+            if (request.PageSize <= 0)
+            {
+                request.PageSize = 20;
+            }
+
+            // Maximum records allowed per page
+            if (request.PageSize > 500)
+            {
+                request.PageSize = 500;
+            }
+
+
+            // ========================================================
+            // 6. SORTING
+            // ========================================================
+            if (string.IsNullOrWhiteSpace(request.SortColumn))
+            {
+                request.SortColumn = "CreatedOn";
+            }
+            else
+            {
+                request.SortColumn =
+                    request.SortColumn.Trim();
+            }
+
+            if (string.IsNullOrWhiteSpace(request.SortDirection))
+            {
+                request.SortDirection = "DESC";
+            }
+            else
+            {
+                request.SortDirection =
+                    request.SortDirection
+                        .Trim()
+                        .ToUpper();
+            }
+
+
+            // ========================================================
+            // 7. VALIDATE SORT DIRECTION
+            // ========================================================
+            if (request.SortDirection != "ASC" &&
+                request.SortDirection != "DESC")
+            {
+                request.SortDirection = "DESC";
+            }
+
+
+            // ========================================================
+            // 8. VALIDATE SORT COLUMN
+            // ========================================================
+            string[] allowedSortColumns =
+            {
+        "UserMasterID",
+        "UserName",
+        "FirstName",
+        "MiddleName",
+        "LastName",
+        "DisplayName",
+        "EmailId",
+        "MobileNo",
+        "UserTypeId",
+        "UserTypeName",
+        "OrganizationID",
+        "OrganizationName",
+        "Status",
+        "StatusName",
+        "ParentId",
+        "CreatedOn",
+        "UpdatedOn"
+    };
+
+            bool isValidSortColumn =
+                allowedSortColumns.Any(x =>
+                    x.Equals(
+                        request.SortColumn,
+                        StringComparison.OrdinalIgnoreCase));
+
+            if (!isValidSortColumn)
+            {
+                request.SortColumn = "CreatedOn";
+            }
+            else
+            {
+                // Use exact casing from allowed list
+                request.SortColumn =
+                    allowedSortColumns.First(x =>
+                        x.Equals(
+                            request.SortColumn,
+                            StringComparison.OrdinalIgnoreCase));
+            }
+
+
+            // ========================================================
+            // 9. GET REPORT
+            // ========================================================
+            UserMasterListReportPagedResponse result =
+                await _repository.GetUserMasterListReport(
+                    request,
+                    serviceUser);
+
+            response.Result = result;
+
+            return response;
+        }
     }
 }

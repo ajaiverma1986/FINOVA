@@ -1711,5 +1711,407 @@ namespace FINOVA.Repository
 
             return row;
         }
+        // ============================================================
+        // USER MASTER - LIST REPORT
+        // ============================================================
+        public async Task<UserMasterListReportPagedResponse> GetUserMasterListReport(
+            UserMasterListReportRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            UserMasterListReportPagedResponse response =
+                new UserMasterListReportPagedResponse();
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[USR].[UserMasters_ListReport]");
+
+            // ========================================================
+            // FILTERS
+            // ========================================================
+
+            _database.AddInParameter(
+                dbCommand,
+                "@FromDate",
+                request.FromDate);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@ToDate",
+                request.ToDate);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@Status",
+                request.Status);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@FreeTextSearch",
+                request.FreeTextSearch);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@UserTypeId",
+                request.UserTypeId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@ParentId",
+                request.ParentId);
+
+
+            // ========================================================
+            // PAGING
+            // ========================================================
+
+            _database.AddInParameter(
+                dbCommand,
+                "@PageNumber",
+                request.PageNumber);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@PageSize",
+                request.PageSize);
+
+
+            // ========================================================
+            // SORTING
+            // ========================================================
+
+            _database.AddInParameter(
+                dbCommand,
+                "@SortColumn",
+                request.SortColumn);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@SortDirection",
+                request.SortDirection);
+
+
+            // ========================================================
+            // EXECUTE
+            // ========================================================
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(dbCommand))
+            {
+                while (dataReader.Read())
+                {
+                    UserMasterListReportResponse row =
+                        MapUserMasterListReport(dataReader);
+
+                    response.Data.Add(row);
+
+                    // TotalRecords is the same for every returned row.
+                    // We only need to read it once.
+                    if (response.TotalRecords == 0)
+                    {
+                        response.TotalRecords =
+                            GetInt32Value(
+                                dataReader,
+                                "TotalRecords") ?? 0;
+                    }
+                }
+            }
+
+
+            // ========================================================
+            // PAGING INFORMATION
+            // ========================================================
+
+            response.PageNumber =
+                request.PageNumber;
+
+            response.PageSize =
+                request.PageSize;
+
+            response.TotalPages =
+                response.PageSize > 0
+                    ? (int)Math.Ceiling(
+                        (double)response.TotalRecords /
+                        response.PageSize)
+                    : 0;
+
+            return response;
+        }
+        private UserMasterListReportResponse MapUserMasterListReport(
+     System.Data.IDataReader dataReader)
+        {
+            UserMasterListReportResponse row =
+                new UserMasterListReportResponse();
+
+            // ========================================================
+            // USER
+            // ========================================================
+
+            row.UserMasterID =
+                GetInt64Value(
+                    dataReader,
+                    "UserMasterID").Value;
+
+            row.ParentId =
+                GetInt64Value(
+                    dataReader,
+                    "ParentId");
+
+            row.UserTypeId =
+                GetInt32Value(
+                    dataReader,
+                    "UserTypeId");
+
+            row.UserTypeName =
+                GetStringValue(
+                    dataReader,
+                    "UserTypeName");
+
+            row.OrganizationID =
+                GetInt32Value(
+                    dataReader,
+                    "OrganizationID");
+
+            row.OrganizationName =
+                GetStringValue(
+                    dataReader,
+                    "OrganizationName");
+
+            row.DomainUserName =
+                GetStringValue(
+                    dataReader,
+                    "DomainUserName");
+
+            row.UserName =
+                GetStringValue(
+                    dataReader,
+                    "UserName");
+
+            row.Title =
+                GetStringValue(
+                    dataReader,
+                    "Title");
+
+            row.FirstName =
+                GetStringValue(
+                    dataReader,
+                    "FirstName");
+
+            row.MiddleName =
+                GetStringValue(
+                    dataReader,
+                    "MiddleName");
+
+            row.LastName =
+                GetStringValue(
+                    dataReader,
+                    "LastName");
+
+            row.DisplayName =
+                GetStringValue(
+                    dataReader,
+                    "DisplayName");
+
+            row.GenderID =
+                GetInt32Value(
+                    dataReader,
+                    "GenderID");
+
+            row.IsPasswordExpired =
+                dataReader["IsPasswordExpired"] != DBNull.Value &&
+                Convert.ToBoolean(
+                    dataReader["IsPasswordExpired"]);
+
+            row.UserId =
+                GetInt64Value(
+                    dataReader,
+                    "UserId") ?? 0;
+
+            row.IsLocked =
+                dataReader["IsLocked"] != DBNull.Value &&
+                Convert.ToBoolean(
+                    dataReader["IsLocked"]);
+
+            row.LockedTill =
+                dataReader["LockedTill"] == DBNull.Value
+                    ? (DateTimeOffset?)null
+                    : (DateTimeOffset)dataReader["LockedTill"];
+
+            row.EmailId =
+                GetStringValue(
+                    dataReader,
+                    "EmailId");
+
+            row.MobileNo =
+                GetStringValue(
+                    dataReader,
+                    "MobileNo");
+
+            row.RemarkReason =
+                GetStringValue(
+                    dataReader,
+                    "RemarkReason");
+
+            row.Status =
+                GetInt32Value(
+                    dataReader,
+                    "Status") ?? 0;
+
+            row.StatusName =
+                GetStringValue(
+                    dataReader,
+                    "StatusName");
+
+
+            // ========================================================
+            // PARENT
+            // ========================================================
+
+            row.ParentUserMasterID =
+                GetInt64Value(
+                    dataReader,
+                    "ParentUserMasterID");
+
+            row.ParentUserTypeId =
+                GetInt32Value(
+                    dataReader,
+                    "ParentUserTypeId");
+
+            row.ParentUserTypeName =
+                GetStringValue(
+                    dataReader,
+                    "ParentUserTypeName");
+
+            row.ParentUserName =
+                GetStringValue(
+                    dataReader,
+                    "ParentUserName");
+
+            row.ParentName =
+                GetStringValue(
+                    dataReader,
+                    "ParentName");
+
+            row.ParentEmailId =
+                GetStringValue(
+                    dataReader,
+                    "ParentEmailId");
+
+            row.ParentMobileNo =
+                GetStringValue(
+                    dataReader,
+                    "ParentMobileNo");
+
+
+            // ========================================================
+            // DISTRIBUTOR (DS)
+            // ========================================================
+
+            row.DSUserMasterID =
+                GetInt64Value(
+                    dataReader,
+                    "DSUserMasterID");
+
+            row.DSCode =
+                GetStringValue(
+                    dataReader,
+                    "DSCode");
+
+            row.DSName =
+                GetStringValue(
+                    dataReader,
+                    "DSName");
+
+            row.DSEmail =
+                GetStringValue(
+                    dataReader,
+                    "DSEmail");
+
+            row.DSMobileNo =
+                GetStringValue(
+                    dataReader,
+                    "DSMobileNo");
+
+
+            // ========================================================
+            // MASTER DISTRIBUTOR (MDS)
+            // ========================================================
+
+            row.MDSUserMasterID =
+                GetInt64Value(
+                    dataReader,
+                    "MDSUserMasterID");
+
+            row.MDSCode =
+                GetStringValue(
+                    dataReader,
+                    "MDSCode");
+
+            row.MDSName =
+                GetStringValue(
+                    dataReader,
+                    "MDSName");
+
+            row.MDSEmail =
+                GetStringValue(
+                    dataReader,
+                    "MDSEmail");
+
+            row.MDSMobileNo =
+                GetStringValue(
+                    dataReader,
+                    "MDSMobileNo");
+
+
+            // ========================================================
+            // CREATED
+            // ========================================================
+
+            row.CreatedOn =
+                dataReader["CreatedOn"] == DBNull.Value
+                    ? (DateTimeOffset?)null
+                    : (DateTimeOffset)dataReader["CreatedOn"];
+
+            row.CreatedBy =
+                GetInt64Value(
+                    dataReader,
+                    "CreatedBy") ?? 0;
+
+            row.CreatedByUserName =
+                GetStringValue(
+                    dataReader,
+                    "CreatedByUserName");
+
+            row.CreatedByName =
+                GetStringValue(
+                    dataReader,
+                    "CreatedByName");
+
+
+            // ========================================================
+            // UPDATED
+            // ========================================================
+
+            row.UpdatedOn =
+                dataReader["UpdatedOn"] == DBNull.Value
+                    ? (DateTimeOffset?)null
+                    : (DateTimeOffset)dataReader["UpdatedOn"];
+
+            row.UpdatedBy =
+                GetInt64Value(
+                    dataReader,
+                    "UpdatedBy");
+
+            row.UpdatedByUserName =
+                GetStringValue(
+                    dataReader,
+                    "UpdatedByUserName");
+
+            row.UpdatedByName =
+                GetStringValue(
+                    dataReader,
+                    "UpdatedByName");
+
+            return row;
+        }
     }
 }

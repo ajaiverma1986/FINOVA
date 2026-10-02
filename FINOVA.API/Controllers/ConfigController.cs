@@ -870,5 +870,151 @@ namespace FINOVA.API.Controllers
 
             return Json(response);
         }
+        // ============================================================
+        // CODE PREFIX MASTER - CREATE
+        // ============================================================
+        [HttpPost("CreateCodePrefix")]
+        public async Task<IActionResult> CreateCodePrefix(
+            [FromBody] CreateCodePrefixRequest request)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.CreateCodePrefix(
+                    request,
+                    CallerUser);
+
+            return Json(response);
+        }
+
+
+        // ============================================================
+        // CODE PREFIX MASTER - UPDATE
+        // ============================================================
+        [HttpPost("UpdateCodePrefix")]
+        public async Task<IActionResult> UpdateCodePrefix(
+            [FromBody] UpdateCodePrefixRequest request)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.UpdateCodePrefix(
+                    request,
+                    CallerUser);
+
+            return Json(response);
+        }
+
+
+        // ============================================================
+        // CODE PREFIX MASTER - DELETE
+        // ============================================================
+        [HttpDelete("DeleteCodePrefix/{id}")]
+        public async Task<IActionResult> DeleteCodePrefix(
+            int id)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.DeleteCodePrefix(
+                    id,
+                    CallerUser);
+
+            return Json(response);
+        }
+
+
+        // ============================================================
+        // CODE PREFIX MASTER - GET / GET ALL
+        // ============================================================
+        [HttpPost("GetCodePrefixes")]
+        public async Task<IActionResult> GetCodePrefixes(
+            [FromBody] GetCodePrefixRequest request)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.GetCodePrefixes(
+                    request,
+                    CallerUser);
+
+            return Json(response);
+        }
+
+
+        // ============================================================
+        // CODE PREFIX MASTER - GET ACTIVE
+        // ============================================================
+        [HttpGet(
+            "GetActiveCodePrefix/{organizationId}/{applicationId}")]
+        public async Task<IActionResult> GetActiveCodePrefix(
+            int organizationId,
+            int applicationId)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.GetActiveCodePrefix(
+                    organizationId,
+                    applicationId,
+                    CallerUser);
+
+            return Json(response);
+        }
     }
 }

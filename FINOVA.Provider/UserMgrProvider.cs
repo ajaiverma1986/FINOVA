@@ -18,6 +18,23 @@ namespace FINOVA.Provider
             _repository = new UserMgrRepository();
             _notificationProvider = new NotificationProvider();
         }
+        public async Task<SimpleResponse> GenerateUserCode(int userTypeID,IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            if (userTypeID <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            response.Result =
+                await _repository.GenerateUserCode(
+                    userTypeID,
+                    serviceUser);
+
+            return response;
+        }
         // ============================================================
         // USER MASTER - CREATE
         // ============================================================
@@ -27,6 +44,9 @@ namespace FINOVA.Provider
         {
             SimpleResponse response = new SimpleResponse();
 
+            // ========================================================
+            // 1. VALIDATE REQUEST
+            // ========================================================
             if (request == null)
             {
                 response.SetError(ErrorCodes.SP_133);
@@ -34,43 +54,115 @@ namespace FINOVA.Provider
             }
 
             if (string.IsNullOrWhiteSpace(request.FirstName) ||
+                string.IsNullOrWhiteSpace(request.Password) ||
                 request.OrganizationID <= 0 ||
-                request.GenderID <= 0)
-            {
-                response.SetError(ErrorCodes.SP_133);
-                return response;
-            }
-
-            if (request.UserTypeId.HasValue &&
+                request.GenderID <= 0 ||
+                !request.UserTypeId.HasValue ||
                 request.UserTypeId.Value <= 0)
             {
                 response.SetError(ErrorCodes.SP_133);
                 return response;
             }
-            string pwd = BCrypt.Net.BCrypt.HashPassword(request.Password);
-            response.Result =
-                await _repository.CreateUserMaster(
-                    request, pwd,
-                    serviceUser);
-            if (Convert.ToInt64(response.Result) > 0)
+
+
+            // ========================================================
+            // 2. GENERATE / USE USERNAME
+            // ========================================================
+            string newUserName;
+
+            if (string.IsNullOrWhiteSpace(request.UserName))
             {
+                SimpleResponse userCodeResponse =
+                    await GenerateUserCode(
+                        request.UserTypeId.Value,
+                        serviceUser);
 
+                if (userCodeResponse.HasError ||
+                    userCodeResponse.Result == null)
+                {
+                    response.SetError(ErrorCodes.SP_133);
+                    return response;
+                }
+
+                GenerateUserCodeResponse? userCodeResult =
+                    userCodeResponse.Result as GenerateUserCodeResponse;
+
+                if (userCodeResult == null ||
+                    string.IsNullOrWhiteSpace(userCodeResult.UserCode))
+                {
+                    response.SetError(ErrorCodes.SP_133);
+                    return response;
+                }
+
+                newUserName = userCodeResult.UserCode;
+            }
+            else
+            {
+                newUserName = request.UserName.Trim();
+            }
+
+
+            // ========================================================
+            // 3. HASH PASSWORD
+            // ========================================================
+            string hashedPassword =
+                BCrypt.Net.BCrypt.HashPassword(
+                    request.Password);
+
+
+            // ========================================================
+            // 4. CREATE USER
+            // ========================================================
+            long userMasterId =
+                await _repository.CreateUserMaster(
+                    request,
+                    hashedPassword,
+                    newUserName,
+                    serviceUser);
+
+            response.Result = userMasterId;
+
+
+            // ========================================================
+            // 5. CHECK USER CREATED
+            // ========================================================
+            if (userMasterId <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+
+            // ========================================================
+            // 6. SEND USER CREATION EMAIL
+            // ========================================================
+            if (!string.IsNullOrWhiteSpace(request.EmailId))
+            {
                 var inputs =
-                            new Dictionary<string, string>
-                            {
-                                { "UserName", "Ajai" },
-                                { "OTP", "458921" },
-                                { "ExpiryMinutes", "5" }
-                            };
+                    new Dictionary<string, string>
+                    {
+                {
+                    "UserName",
+                    newUserName
+                },
+                {
+                    "FirstName",
+                    request.FirstName
+                }
+                    };
 
-
-                SimpleResponse result = await _notificationProvider.SendEmail(
-                        "ajaibit@gmail.com",
-                        "Forget Password OTP",
+                SimpleResponse emailResponse =
+                    await _notificationProvider.SendEmail(
+                        request.EmailId,
+                        "User Created",
                         inputs,
                         serviceUser);
 
+                // User has already been created successfully.
+                // Therefore email failure should normally NOT
+                // change the CreateUserMaster result.
             }
+
 
             return response;
         }
@@ -2047,6 +2139,92 @@ namespace FINOVA.Provider
             // 11. SUCCESS
             // ========================================================
             response.Result = resetResult;
+
+            return response;
+        }
+        // ============================================================
+        // USER MASTER - MAP PARENT
+        // ============================================================
+        public async Task<SimpleResponse> MapUserParent(
+            MapUserParentRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            // Validate request
+            if (request == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            // Validate UserMasterID
+            if (request.UserMasterID <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            // Validate ParentId
+            if (request.ParentId <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            // User cannot be their own parent
+            if (request.UserMasterID == request.ParentId)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            // Map parent
+            MapUserParentResponse? result =
+                await _repository.MapUserParent(
+                    request.UserMasterID,
+                    request.ParentId,
+                    serviceUser);
+
+            if (result == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            response.Result = result;
+
+            return response;
+        }
+        // ============================================================
+        // USER MASTER - GET USERS BY PARENT ID
+        // ============================================================
+        public async Task<SimpleResponse> GetUsersByParentId(
+            long parentId,
+            int? userTypeId,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            // Validate ParentId
+            if (parentId <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            // Validate UserTypeId if provided
+            if (userTypeId.HasValue && userTypeId.Value <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            response.Result =
+                await _repository.GetUsersByParentId(
+                    parentId,
+                    userTypeId,
+                    serviceUser);
 
             return response;
         }

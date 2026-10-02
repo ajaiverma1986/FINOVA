@@ -197,4 +197,28 @@ namespace FINOVA.DataModel.Masters
         public DateTime? CreatedOn { get; set; }
         public long CreatedBy { get; set; }
     }
+    
+    public class GetCodePrefixResponse
+    {
+        public int Id { get; set; }
+        public int OrganizationId { get; set; }
+        public int ApplicationId { get; set; }
+        public string? CodePrefix { get; set; }
+        public string? CodeLngth { get; set; }
+        public int Status { get; set; }
+        public string? StatusName { get; set; }
+    }
+
+    public class UpdateCodePrefixResponse
+    {
+        public int Id { get; set; }
+        public bool IsUpdated { get; set; }
+        public string? Message { get; set; }
+    }
+    public class DeleteCodePrefixResponse
+    {
+        public int Id { get; set; }
+        public bool IsDeleted { get; set; }
+        public string? Message { get; set; }
+    }
 }

@@ -347,4 +347,144 @@ namespace FINOVA.DataModel.Report
 
         public string? UpdatedByName { get; set; }
     }
+    public class UserMasterListReportResponse
+    {
+        // ========================================================
+        // USER DETAILS
+        // ========================================================
+
+        public long UserMasterID { get; set; }
+
+        public long? ParentId { get; set; }
+
+        public int? UserTypeId { get; set; }
+
+        public string? UserTypeName { get; set; }
+
+        public long? OrganizationID { get; set; }
+
+        public string? OrganizationName { get; set; }
+
+        public string? DomainUserName { get; set; }
+
+        public string? UserName { get; set; }
+
+        public string? Title { get; set; }
+
+        public string? FirstName { get; set; }
+
+        public string? MiddleName { get; set; }
+
+        public string? LastName { get; set; }
+
+        public string? DisplayName { get; set; }
+
+        public int? GenderID { get; set; }
+
+        public bool IsPasswordExpired { get; set; }
+
+        public long UserId { get; set; }
+
+        public bool IsLocked { get; set; }
+
+        public DateTimeOffset? LockedTill { get; set; }
+
+        public string? EmailId { get; set; }
+
+        public string? MobileNo { get; set; }
+
+        public string? RemarkReason { get; set; }
+
+        public int Status { get; set; }
+
+        public string? StatusName { get; set; }
+
+
+        // ========================================================
+        // DIRECT PARENT DETAILS
+        // ========================================================
+
+        public long? ParentUserMasterID { get; set; }
+
+        public int? ParentUserTypeId { get; set; }
+
+        public string? ParentUserTypeName { get; set; }
+
+        public string? ParentUserName { get; set; }
+
+        public string? ParentName { get; set; }
+
+        public string? ParentEmailId { get; set; }
+
+        public string? ParentMobileNo { get; set; }
+
+
+        // ========================================================
+        // DISTRIBUTOR DETAILS
+        // ========================================================
+
+        public long? DSUserMasterID { get; set; }
+
+        public string? DSCode { get; set; }
+
+        public string? DSName { get; set; }
+
+        public string? DSEmail { get; set; }
+
+        public string? DSMobileNo { get; set; }
+
+
+        // ========================================================
+        // MASTER DISTRIBUTOR DETAILS
+        // ========================================================
+
+        public long? MDSUserMasterID { get; set; }
+
+        public string? MDSCode { get; set; }
+
+        public string? MDSName { get; set; }
+
+        public string? MDSEmail { get; set; }
+
+        public string? MDSMobileNo { get; set; }
+
+
+        // ========================================================
+        // CREATED DETAILS
+        // ========================================================
+
+        public DateTimeOffset? CreatedOn { get; set; }
+
+        public long CreatedBy { get; set; }
+
+        public string? CreatedByUserName { get; set; }
+
+        public string? CreatedByName { get; set; }
+
+
+        // ========================================================
+        // UPDATED DETAILS
+        // ========================================================
+
+        public DateTimeOffset? UpdatedOn { get; set; }
+
+        public long? UpdatedBy { get; set; }
+
+        public string? UpdatedByUserName { get; set; }
+
+        public string? UpdatedByName { get; set; }
+    }
+    public class UserMasterListReportPagedResponse
+    {
+        public List<UserMasterListReportResponse> Data { get; set; }
+            = new List<UserMasterListReportResponse>();
+
+        public long TotalRecords { get; set; }
+
+        public int PageNumber { get; set; }
+
+        public int PageSize { get; set; }
+
+        public int TotalPages { get; set; }
+    }
 }

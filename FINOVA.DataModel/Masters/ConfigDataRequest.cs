@@ -169,4 +169,30 @@ namespace FINOVA.DataModel.Masters
         public decimal? CalculationValue { get; set; }
         public int Status { get; set; }
     }
+    public class CreateCodePrefixRequest
+    {
+        public int OrganizationId { get; set; }
+        public int ApplicationId { get; set; }
+        public string CodePrefix { get; set; }
+        public string CodeLngth { get; set; }
+        public int Status { get; set; } = 1;
+    }
+
+    public class UpdateCodePrefixRequest
+    {
+        public int Id { get; set; }
+        public int OrganizationId { get; set; }
+        public int ApplicationId { get; set; }
+        public string CodePrefix { get; set; }
+        public string CodeLngth { get; set; }
+        public int Status { get; set; }
+    }
+    public class GetCodePrefixRequest
+    {
+        public int? Id { get; set; }
+        public int? OrganizationId { get; set; }
+        public int? ApplicationId { get; set; }
+        public string? CodePrefix { get; set; }
+        public int? Status { get; set; }
+    }
 }

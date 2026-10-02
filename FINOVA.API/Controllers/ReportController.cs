@@ -116,5 +116,34 @@ namespace FINOVA.API.Controllers
 
             return Json(response);
         }
+        // ============================================================
+        // USER MASTER - LIST REPORT
+        // ============================================================
+        [HttpPost("GetUserMasterListReport")]
+        public async Task<IActionResult> GetUserMasterListReport(
+            [FromBody] UserMasterListReportRequest request)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            // Authenticate and authorize
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            // Get report
+            response =
+                await _Provider.GetUserMasterListReport(
+                    request,
+                    CallerUser);
+
+            return Json(response);
+        }
     }
 }

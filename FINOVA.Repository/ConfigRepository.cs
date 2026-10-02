@@ -1721,5 +1721,304 @@ namespace FINOVA.Repository
 
             return row;
         }
+        // ============================================================
+        // CODE PREFIX MASTER - CREATE
+        // ============================================================
+        public async Task<long> CreateCodePrefix(
+            CreateCodePrefixRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            long outputId = 0;
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[CONFG].[CodePrefixMaster_Create]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@OrganizationId",
+                request.OrganizationId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@ApplicationId",
+                request.ApplicationId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@CodePrefix",
+                request.CodePrefix);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@CodeLngth",
+                request.CodeLngth);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@Status",
+                request.Status);
+
+            _database.AddOutParameter(
+                dbCommand,
+                "@Out_ID",
+                OUTPARAMETER_SIZE);
+
+            await _database.ExecuteNonQueryAsync(
+                dbCommand);
+
+            outputId =
+                GetIDOutputLong(dbCommand);
+
+            return outputId;
+        }
+        // ============================================================
+        // CODE PREFIX MASTER - UPDATE
+        // ============================================================
+        public async Task<UpdateCodePrefixResponse> UpdateCodePrefix(
+            UpdateCodePrefixRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            UpdateCodePrefixResponse response =
+                new UpdateCodePrefixResponse();
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[CONFG].[CodePrefixMaster_Update]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@Id",
+                request.Id);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@OrganizationId",
+                request.OrganizationId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@ApplicationId",
+                request.ApplicationId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@CodePrefix",
+                request.CodePrefix);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@CodeLngth",
+                request.CodeLngth);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@Status",
+                request.Status);
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(
+                       dbCommand))
+            {
+                if (dataReader.Read())
+                {
+                    response.Id =
+                        GetInt32Value(
+                            dataReader,
+                            "Id").Value;
+
+                    response.IsUpdated =
+                        Convert.ToBoolean(
+                            dataReader["IsUpdated"]);
+
+                    response.Message =
+                        GetStringValue(
+                            dataReader,
+                            "Message");
+                }
+            }
+
+            return response;
+        }
+        // ============================================================
+        // CODE PREFIX MASTER - DELETE
+        // ============================================================
+        public async Task<DeleteCodePrefixResponse> DeleteCodePrefix(
+            int id,
+            IFINOVAServiceUser serviceUser)
+        {
+            DeleteCodePrefixResponse response =
+                new DeleteCodePrefixResponse();
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[CONFG].[CodePrefixMaster_Delete]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@Id",
+                id);
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(
+                       dbCommand))
+            {
+                if (dataReader.Read())
+                {
+                    response.Id =
+                        GetInt32Value(
+                            dataReader,
+                            "Id").Value;
+
+                    response.IsDeleted =
+                        Convert.ToBoolean(
+                            dataReader["IsDeleted"]);
+
+                    response.Message =
+                        GetStringValue(
+                            dataReader,
+                            "Message");
+                }
+            }
+
+            return response;
+        }
+        // ============================================================
+        // CODE PREFIX MASTER - GET / GET ALL
+        // ============================================================
+        public async Task<List<GetCodePrefixResponse>> GetCodePrefixes(
+            GetCodePrefixRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            List<GetCodePrefixResponse> response =
+                new List<GetCodePrefixResponse>();
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[CONFG].[CodePrefixMaster_Get]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@Id",
+                request.Id);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@OrganizationId",
+                request.OrganizationId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@ApplicationId",
+                request.ApplicationId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@CodePrefix",
+                request.CodePrefix);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@Status",
+                request.Status);
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(
+                       dbCommand))
+            {
+                while (dataReader.Read())
+                {
+                    GetCodePrefixResponse row =
+                        MapCodePrefix(dataReader);
+
+                    response.Add(row);
+                }
+            }
+
+            return response;
+        }
+        // ============================================================
+        // CODE PREFIX MASTER - GET ACTIVE
+        // ============================================================
+        public async Task<GetCodePrefixResponse?> GetActiveCodePrefix(
+            int organizationId,
+            int applicationId,
+            IFINOVAServiceUser serviceUser)
+        {
+            GetCodePrefixResponse? response = null;
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[CONFG].[CodePrefixMaster_GetActive]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@OrganizationId",
+                organizationId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@ApplicationId",
+                applicationId);
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(
+                       dbCommand))
+            {
+                if (dataReader.Read())
+                {
+                    response =
+                        MapCodePrefix(dataReader);
+                }
+            }
+
+            return response;
+        }
+        // ============================================================
+        // CODE PREFIX MASTER - MAPPER
+        // ============================================================
+        private GetCodePrefixResponse MapCodePrefix(
+            System.Data.IDataReader dataReader)
+        {
+            GetCodePrefixResponse row =
+                new GetCodePrefixResponse();
+
+            row.Id =
+                GetInt32Value(
+                    dataReader,
+                    "Id").Value;
+
+            row.OrganizationId =
+                GetInt32Value(
+                    dataReader,
+                    "OrganizationId").Value;
+
+            row.ApplicationId =
+                GetInt32Value(
+                    dataReader,
+                    "ApplicationId").Value;
+
+            row.CodePrefix =
+                GetStringValue(
+                    dataReader,
+                    "CodePrefix");
+
+            row.CodeLngth =
+                GetStringValue(
+                    dataReader,
+                    "CodeLngth");
+
+            row.Status =
+                GetInt32Value(
+                    dataReader,
+                    "Status").Value;
+
+            row.StatusName =
+                GetStringValue(
+                    dataReader,
+                    "StatusName");
+
+            return row;
+        }
     }
 }

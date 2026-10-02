@@ -2322,5 +2322,61 @@ namespace FINOVA.API.Controllers
 
             return Json(response);
         }
+        // ============================================================
+        // USER MASTER - MAP PARENT
+        // ============================================================
+        [HttpPost("MapUserParent")]
+        public async Task<IActionResult> MapUserParent(
+            [FromBody] MapUserParentRequest request)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.MapUserParent(
+                    request,
+                    CallerUser);
+
+            return Json(response);
+        }
+        // ============================================================
+        // USER MASTER - GET USERS BY PARENT ID
+        // ============================================================
+        [HttpGet("GetUsersByParentId/{parentId}")]
+        public async Task<IActionResult> GetUsersByParentId(
+            long parentId,
+            [FromQuery] int? userTypeId = null)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.GetUsersByParentId(
+                    parentId,
+                    userTypeId,
+                    CallerUser);
+
+            return Json(response);
+        }
     }
 }

@@ -95,4 +95,22 @@ namespace FINOVA.DataModel.Report
         public string SortColumn { get; set; } = "CreatedOn";
         public string SortDirection { get; set; } = "DESC";
     }
+    public class UserMasterListReportRequest
+    {
+        // Filters
+        public DateTime? FromDate { get; set; }
+        public DateTime? ToDate { get; set; }
+        public int? Status { get; set; }
+        public string? FreeTextSearch { get; set; }
+        public int? UserTypeId { get; set; }
+        public long? ParentId { get; set; }
+
+        // Paging
+        public int PageNumber { get; set; } = 1;
+        public int PageSize { get; set; } = 20;
+
+        // Sorting
+        public string SortColumn { get; set; } = "CreatedOn";
+        public string SortDirection { get; set; } = "DESC";
+    }
 }

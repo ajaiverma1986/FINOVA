@@ -16,10 +16,46 @@ namespace FINOVA.Repository
             _database = new FINOVADatabase();
         }
         // ============================================================
+        // USER MASTER - GENERATE USER CODE
+        // ============================================================
+        public async Task<GenerateUserCodeResponse?> GenerateUserCode(
+            int userTypeID,
+            IFINOVAServiceUser serviceUser)
+        {
+            GenerateUserCodeResponse? response = null;
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[USR].[usp_generateusercode]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@UserTypeID",
+                userTypeID);
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(dbCommand))
+            {
+                if (dataReader.Read())
+                {
+                    response =
+                        new GenerateUserCodeResponse
+                        {
+                            UserCode =
+                                GetStringValue(
+                                    dataReader,
+                                    "UserCode")
+                        };
+                }
+            }
+
+            return response;
+        }
+        // ============================================================
         // USER MASTER - CREATE
         // ============================================================
         public async Task<long> CreateUserMaster(
-            CreateUserMasterRequest request,string passwo,
+            CreateUserMasterRequest request,string passwo,string username,
             IFINOVAServiceUser serviceUser)
         {
             long userMasterID = 0;
@@ -41,7 +77,7 @@ namespace FINOVA.Repository
             _database.AddInParameter(
                 dbCommand,
                 "@UserName",
-                request.UserName);
+                username);
 
            
             _database.AddInParameter(
@@ -535,15 +571,24 @@ namespace FINOVA.Repository
             return response;
         }
         private GetUserMasterResponse MapUserMaster(
-    System.Data.IDataReader dataReader)
+       System.Data.IDataReader dataReader)
         {
             GetUserMasterResponse row =
                 new GetUserMasterResponse();
+
+            // =========================================================
+            // USER DETAILS
+            // =========================================================
 
             row.UserMasterID =
                 GetInt64Value(
                     dataReader,
                     "UserMasterID").Value;
+
+            row.ParentId =
+                GetInt64Value(
+                    dataReader,
+                    "ParentId");
 
             row.UserTypeId =
                 GetInt32Value(
@@ -583,7 +628,7 @@ namespace FINOVA.Repository
             row.FirstName =
                 GetStringValue(
                     dataReader,
-                    "FirstName");
+                    "FirstName") ?? string.Empty;
 
             row.MiddleName =
                 GetStringValue(
@@ -669,6 +714,66 @@ namespace FINOVA.Repository
                 GetInt64Value(
                     dataReader,
                     "UpdatedBy");
+
+
+            // =========================================================
+            // DISTRIBUTOR DETAILS
+            // =========================================================
+
+            row.DSUserMasterID =
+                GetInt64Value(
+                    dataReader,
+                    "DSUserMasterID");
+
+            row.DSCode =
+                GetStringValue(
+                    dataReader,
+                    "DSCode");
+
+            row.DSName =
+                GetStringValue(
+                    dataReader,
+                    "DSName");
+
+            row.DSEmail =
+                GetStringValue(
+                    dataReader,
+                    "DSEmail");
+
+            row.DSMobileNo =
+                GetStringValue(
+                    dataReader,
+                    "DSMobileNo");
+
+
+            // =========================================================
+            // MASTER DISTRIBUTOR DETAILS
+            // =========================================================
+
+            row.MDSUserMasterID =
+                GetInt64Value(
+                    dataReader,
+                    "MDSUserMasterID");
+
+            row.MDSCode =
+                GetStringValue(
+                    dataReader,
+                    "MDSCode");
+
+            row.MDSName =
+                GetStringValue(
+                    dataReader,
+                    "MDSName");
+
+            row.MDSEmail =
+                GetStringValue(
+                    dataReader,
+                    "MDSEmail");
+
+            row.MDSMobileNo =
+                GetStringValue(
+                    dataReader,
+                    "MDSMobileNo");
 
             return row;
         }
@@ -3203,6 +3308,141 @@ namespace FINOVA.Repository
                         GetStringValue(
                             dataReader,
                             "Message");
+                }
+            }
+
+            return response;
+        }
+        // ============================================================
+        // USER MASTER - MAP PARENT
+        // ============================================================
+        public async Task<MapUserParentResponse?> MapUserParent(
+            long userMasterID,
+            long parentId,
+            IFINOVAServiceUser serviceUser)
+        {
+            MapUserParentResponse? response = null;
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[USR].[UserMasters_MapParent]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@UserMasterID",
+                userMasterID);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@ParentId",
+                parentId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@UpdatedBy",
+                serviceUser.UserMasterID);
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(dbCommand))
+            {
+                if (dataReader.Read())
+                {
+                    response = new MapUserParentResponse
+                    {
+                        UserMasterID =
+                            GetInt64Value(
+                                dataReader,
+                                "UserMasterID").Value,
+
+                        ParentId =
+                            GetInt64Value(
+                                dataReader,
+                                "ParentId"),
+
+                        UserTypeId =
+                            GetInt32Value(
+                                dataReader,
+                                "UserTypeId"),
+
+                        OrganizationID =
+                            GetInt32Value(
+                                dataReader,
+                                "OrganizationID").Value,
+
+                        UserName =
+                            GetStringValue(
+                                dataReader,
+                                "UserName"),
+
+                        FirstName =
+                            GetStringValue(
+                                dataReader,
+                                "FirstName"),
+
+                        MiddleName =
+                            GetStringValue(
+                                dataReader,
+                                "MiddleName"),
+
+                        LastName =
+                            GetStringValue(
+                                dataReader,
+                                "LastName"),
+
+                        DisplayName =
+                            GetStringValue(
+                                dataReader,
+                                "DisplayName"),
+
+                        UpdatedOn =
+                            GetDateTimeOffsetValue(
+                                dataReader,
+                                "UpdatedOn"),
+
+                        UpdatedBy =
+                            GetInt64Value(
+                                dataReader,
+                                "UpdatedBy")
+                    };
+                }
+            }
+
+            return response;
+        }
+        // ============================================================
+        // USER MASTER - GET USERS BY PARENT ID
+        // ============================================================
+        public async Task<List<GetUserMasterResponse>> GetUsersByParentId(
+            long parentId,
+            int? userTypeId,
+            IFINOVAServiceUser serviceUser)
+        {
+            List<GetUserMasterResponse> response =
+                new List<GetUserMasterResponse>();
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[USR].[UserMasters_GetByParentId]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@ParentId",
+                parentId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@UserTypeId",
+                userTypeId);
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(dbCommand))
+            {
+                while (dataReader.Read())
+                {
+                    GetUserMasterResponse user =
+                        MapUserMaster(dataReader);
+
+                    response.Add(user);
                 }
             }
 

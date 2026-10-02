@@ -8,7 +8,13 @@ namespace FINOVA.DataModel.UserMgr
 {
     public class GetUserMasterResponse
     {
+        // =========================================================
+        // USER DETAILS
+        // =========================================================
+
         public long UserMasterID { get; set; }
+
+        public long? ParentId { get; set; }
 
         public int? UserTypeId { get; set; }
         public string? UserTypeName { get; set; }
@@ -20,7 +26,8 @@ namespace FINOVA.DataModel.UserMgr
         public string? UserName { get; set; }
 
         public string? Title { get; set; }
-        public string FirstName { get; set; }
+
+        public string FirstName { get; set; } = string.Empty;
         public string? MiddleName { get; set; }
         public string? LastName { get; set; }
         public string? DisplayName { get; set; }
@@ -46,6 +53,36 @@ namespace FINOVA.DataModel.UserMgr
 
         public DateTimeOffset? UpdatedOn { get; set; }
         public long? UpdatedBy { get; set; }
+
+
+        // =========================================================
+        // DISTRIBUTOR DETAILS
+        // =========================================================
+
+        public long? DSUserMasterID { get; set; }
+
+        public string? DSCode { get; set; }
+
+        public string? DSName { get; set; }
+
+        public string? DSEmail { get; set; }
+
+        public string? DSMobileNo { get; set; }
+
+
+        // =========================================================
+        // MASTER DISTRIBUTOR DETAILS
+        // =========================================================
+
+        public long? MDSUserMasterID { get; set; }
+
+        public string? MDSCode { get; set; }
+
+        public string? MDSName { get; set; }
+
+        public string? MDSEmail { get; set; }
+
+        public string? MDSMobileNo { get; set; }
     }
     public class GetUserAddressResponse
     {
@@ -188,5 +225,23 @@ namespace FINOVA.DataModel.UserMgr
         public long UserMasterID { get; set; }
 
         public string? Message { get; set; }
+    }
+    public class GenerateUserCodeResponse
+    {
+        public string? UserCode { get; set; }
+    }
+    public class MapUserParentResponse
+    {
+        public long UserMasterID { get; set; }
+        public long? ParentId { get; set; }
+        public int? UserTypeId { get; set; }
+        public int OrganizationID { get; set; }
+        public string? UserName { get; set; }
+        public string? FirstName { get; set; }
+        public string? MiddleName { get; set; }
+        public string? LastName { get; set; }
+        public string? DisplayName { get; set; }
+        public DateTimeOffset? UpdatedOn { get; set; }
+        public long? UpdatedBy { get; set; }
     }
 }

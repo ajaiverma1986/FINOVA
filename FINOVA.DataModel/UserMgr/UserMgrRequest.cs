@@ -370,4 +370,9 @@ namespace FINOVA.DataModel.UserMgr
 
         public string ConfirmPassword { get; set; }
     }
+    public class MapUserParentRequest
+    {
+        public long UserMasterID { get; set; }
+        public long ParentId { get; set; }
+    }
 }
