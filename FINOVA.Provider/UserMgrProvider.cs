@@ -2228,5 +2228,220 @@ namespace FINOVA.Provider
 
             return response;
         }
+        // ============================================================
+        // CREATE USER WALLET
+        // ============================================================
+        public async Task<SimpleResponse> CreateUserWallet(
+            CreateUserWalletRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            if (request == null ||
+                request.UserMasterId <= 0 ||
+                request.AvailableLimit < 0 ||
+                request.ThresoldLimit < 0 ||
+                request.Status <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            long result =
+                await _repository.CreateUserWallet(
+                    request,
+                    serviceUser);
+
+            response.Result = result;
+
+            return response;
+        }
+
+
+        // ============================================================
+        // UPDATE USER WALLET
+        // ============================================================
+        public async Task<SimpleResponse> UpdateUserWallet(
+            UpdateUserWalletRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            if (request == null ||
+                request.UserDetailId <= 0 ||
+                request.UserMasterId <= 0 ||
+                request.AvailableLimit < 0 ||
+                request.ThresoldLimit < 0 ||
+                request.Status <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            UpdateUserWalletResponse? result =
+                await _repository.UpdateUserWallet(
+                    request,
+                    serviceUser);
+
+            if (result == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            response.Result = result;
+
+            return response;
+        }
+
+
+        // ============================================================
+        // DELETE USER WALLET
+        // ============================================================
+        public async Task<SimpleResponse> DeleteUserWallet(
+            long userDetailId,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            if (userDetailId <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            DeleteUserWalletResponse? result =
+                await _repository.DeleteUserWallet(
+                    userDetailId,
+                    serviceUser);
+
+            if (result == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            response.Result = result;
+
+            return response;
+        }
+
+
+        // ============================================================
+        // GET USER WALLET BY ID
+        // ============================================================
+        public async Task<SimpleResponse> GetUserWalletByID(
+            long userDetailId,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            if (userDetailId <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            GetUserWalletResponse? result =
+                await _repository.GetUserWalletByID(
+                    userDetailId,
+                    serviceUser);
+
+            if (result == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            response.Result = result;
+
+            return response;
+        }
+
+
+        // ============================================================
+        // GET ALL / FILTER USER WALLETS
+        // ============================================================
+        public async Task<SimpleResponse> GetUserWallets(
+            GetUserWalletRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            request ??= new GetUserWalletRequest();
+
+           
+
+            List<GetUserWalletResponse> result =
+                await _repository.GetUserWallets(
+                    request,
+                    serviceUser);
+
+            response.Result = result;
+
+            return response;
+        }
+        public async Task<SimpleResponse> UpdateUserWalletThresoldLimit(
+    UpdateUserWalletThresoldLimitRequest request,
+    IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            // Validate request
+            if (request == null ||
+                request.UserMasterId <= 0 ||
+                request.ThresoldLimit < 0 )
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            // Call Repository
+            UpdateUserWalletThresoldLimitResponse? result =
+                await _repository.UpdateUserWalletThresoldLimit(
+                    request,
+                    serviceUser);
+
+            if (result == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            response.Result = result;
+
+            return response;
+        }
+        public async Task<SimpleResponse> GetThresoldUserList(
+    GetThresoldUserListRequest request,
+    IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            request ??= new GetThresoldUserListRequest();
+
+           
+
+
+            // Clean search text
+            if (!string.IsNullOrWhiteSpace(request.SearchText))
+            {
+                request.SearchText = request.SearchText.Trim();
+            }
+            else
+            {
+                request.SearchText = null;
+            }
+
+            // Get threshold user list
+            List<GetThresoldUserListResponse> result =
+                await _repository.GetThresoldUserList(
+                    request,
+                    serviceUser);
+
+            response.Result = result;
+
+            return response;
+        }
     }
 }

@@ -375,4 +375,44 @@ namespace FINOVA.DataModel.UserMgr
         public long UserMasterID { get; set; }
         public long ParentId { get; set; }
     }
+    public class CreateUserWalletRequest
+    {
+        public long UserMasterId { get; set; }
+        public decimal AvailableLimit { get; set; }
+        public decimal ThresoldLimit { get; set; }
+        public string? RemarkReason { get; set; }
+        public int Status { get; set; } = 1;
+    }
+
+    public class UpdateUserWalletRequest
+    {
+        public long UserDetailId { get; set; }
+        public long UserMasterId { get; set; }
+        public decimal AvailableLimit { get; set; }
+        public decimal ThresoldLimit { get; set; }
+        public string? RemarkReason { get; set; }
+        public int Status { get; set; }
+    }
+
+    public class GetUserWalletRequest
+    {
+        public long? UserMasterId { get; set; }
+        public int? Status { get; set; }
+    }
+    public class UpdateUserWalletThresoldLimitRequest
+    {
+        public long UserMasterId { get; set; }
+
+        public decimal ThresoldLimit { get; set; }
+
+        public string ThresoldReason { get; set; } = string.Empty;
+    }
+    public class GetThresoldUserListRequest
+    {
+        public int? OrganizationID { get; set; }
+        public int? UserTypeId { get; set; }
+        public long? ParentId { get; set; }
+        public int? Status { get; set; }
+        public string? SearchText { get; set; }
+    }
 }

@@ -2378,5 +2378,199 @@ namespace FINOVA.API.Controllers
 
             return Json(response);
         }
+        // ============================================================
+        // CREATE USER WALLET
+        // ============================================================
+        [HttpPost("CreateUserWallet")]
+        public async Task<IActionResult> CreateUserWallet(
+            [FromBody] CreateUserWalletRequest request)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.CreateUserWallet(
+                    request,
+                    CallerUser);
+
+            return Json(response);
+        }
+
+
+        // ============================================================
+        // UPDATE USER WALLET
+        // ============================================================
+        [HttpPut("UpdateUserWallet")]
+        public async Task<IActionResult> UpdateUserWallet(
+            [FromBody] UpdateUserWalletRequest request)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.UpdateUserWallet(
+                    request,
+                    CallerUser);
+
+            return Json(response);
+        }
+
+
+        // ============================================================
+        // DELETE USER WALLET
+        // ============================================================
+        [HttpDelete("DeleteUserWallet/{userDetailId}")]
+        public async Task<IActionResult> DeleteUserWallet(
+            long userDetailId)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.DeleteUserWallet(
+                    userDetailId,
+                    CallerUser);
+
+            return Json(response);
+        }
+
+
+        // ============================================================
+        // GET USER WALLET BY ID
+        // ============================================================
+        [HttpGet("GetUserWalletByID/{userDetailId}")]
+        public async Task<IActionResult> GetUserWalletByID(
+            long userDetailId)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.GetUserWalletByID(
+                    userDetailId,
+                    CallerUser);
+
+            return Json(response);
+        }
+
+
+        // ============================================================
+        // GET ALL / FILTER USER WALLETS
+        // ============================================================
+        [HttpPost("GetUserWallets")]
+        public async Task<IActionResult> GetUserWallets(
+            [FromBody] GetUserWalletRequest request)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.GetUserWallets(
+                    request,
+                    CallerUser);
+
+            return Json(response);
+        }
+        [HttpPut("UpdateUserWalletThresoldLimit")]
+        public async Task<IActionResult> UpdateUserWalletThresoldLimit(
+    [FromBody] UpdateUserWalletThresoldLimitRequest request)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.UpdateUserWalletThresoldLimit(
+                    request,
+                    CallerUser);
+
+            return Json(response);
+        }
+        // ============================================================
+        // GET THRESHOLD USER LIST
+        // ============================================================
+        [HttpPost("GetThresoldUserList")]
+        public async Task<IActionResult> GetThresoldUserList(
+            [FromBody] GetThresoldUserListRequest request)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.GetThresoldUserList(
+                    request,
+                    CallerUser);
+
+            return Json(response);
+        }
     }
 }

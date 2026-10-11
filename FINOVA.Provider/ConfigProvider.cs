@@ -976,5 +976,593 @@ namespace FINOVA.Provider
 
             return response;
         }
+        // ============================================================
+        // CREATE SERVICE AGENCY CHARGE
+        // ============================================================
+        public async Task<SimpleResponse> CreateServiceAgencyCharge(
+            CreateServiceAgencyChargeRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            if (request == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            // Validate amount range
+            if (request.FromAmount < 0 ||
+                request.ToAmount < 0 ||
+                request.ToAmount < request.FromAmount ||
+                request.CalculationValue < 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            // Validate optional IDs when provided
+            if (request.AgencyID.HasValue &&
+                request.AgencyID.Value <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            if (request.ServiceID.HasValue &&
+                request.ServiceID.Value <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            if (request.SlabTypeId.HasValue &&
+                request.SlabTypeId.Value <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            if (request.CalculationTypeId.HasValue &&
+                request.CalculationTypeId.Value <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            long mappingId =
+                await _repository.CreateServiceAgencyCharge(
+                    request,
+                    serviceUser);
+
+            response.Result = mappingId;
+
+            return response;
+        }
+
+
+        // ============================================================
+        // UPDATE SERVICE AGENCY CHARGE
+        // ============================================================
+        public async Task<SimpleResponse> UpdateServiceAgencyCharge(
+            UpdateServiceAgencyChargeRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            if (request == null ||
+                request.MappingId <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            // Validate amount range
+            if (request.FromAmount < 0 ||
+                request.ToAmount < 0 ||
+                request.ToAmount < request.FromAmount ||
+                request.CalculationValue < 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            // Validate optional IDs
+            if (request.AgencyID.HasValue &&
+                request.AgencyID.Value <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            if (request.ServiceID.HasValue &&
+                request.ServiceID.Value <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            if (request.SlabTypeId.HasValue &&
+                request.SlabTypeId.Value <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            if (request.CalculationTypeId.HasValue &&
+                request.CalculationTypeId.Value <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            UpdateServiceAgencyChargeResponse? result =
+                await _repository.UpdateServiceAgencyCharge(
+                    request,
+                    serviceUser);
+
+            if (result == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            response.Result = result;
+
+            return response;
+        }
+
+
+        // ============================================================
+        // DELETE SERVICE AGENCY CHARGE
+        // ============================================================
+        public async Task<SimpleResponse> DeleteServiceAgencyCharge(
+            long mappingId,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            if (mappingId <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            DeleteServiceAgencyChargeResponse? result =
+                await _repository.DeleteServiceAgencyCharge(
+                    mappingId,
+                    serviceUser);
+
+            if (result == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            response.Result = result;
+
+            return response;
+        }
+
+
+        // ============================================================
+        // GET SERVICE AGENCY CHARGE BY ID
+        // ============================================================
+        public async Task<SimpleResponse> GetServiceAgencyChargeByID(
+            long mappingId,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            if (mappingId <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            GetServiceAgencyChargeResponse? result =
+                await _repository.GetServiceAgencyChargeByID(
+                    mappingId,
+                    serviceUser);
+
+            if (result == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            response.Result = result;
+
+            return response;
+        }
+
+
+        // ============================================================
+        // GET SERVICE AGENCY CHARGES
+        // ============================================================
+        public async Task<SimpleResponse> GetServiceAgencyCharges(
+            GetServiceAgencyChargeRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            // Allow an empty request because all GetAll filters are optional
+            request ??= new GetServiceAgencyChargeRequest();
+
+            if (request.AgencyID.HasValue &&
+                request.AgencyID.Value <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            if (request.ServiceID.HasValue &&
+                request.ServiceID.Value <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            if (request.SlabTypeId.HasValue &&
+                request.SlabTypeId.Value <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            if (request.CalculationTypeId.HasValue &&
+                request.CalculationTypeId.Value <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            List<GetServiceAgencyChargeResponse> result =
+                await _repository.GetServiceAgencyCharges(
+                    request,
+                    serviceUser);
+
+            response.Result = result;
+
+            return response;
+        }
+        // ============================================================
+        // CREATE TDS MASTER
+        // ============================================================
+        public async Task<SimpleResponse> CreateTdsMaster(
+            CreateTdsMasterRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            if (request == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            if (request.TdsRate < 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            int result =
+                await _repository.CreateTdsMaster(
+                    request,
+                    serviceUser);
+
+            response.Result = result;
+
+            return response;
+        }
+
+
+        // ============================================================
+        // UPDATE TDS MASTER
+        // ============================================================
+        public async Task<SimpleResponse> UpdateTdsMaster(
+            UpdateTdsMasterRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            if (request == null ||
+                request.TdsRateId <= 0 ||
+                request.TdsRate < 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            UpdateTdsMasterResponse? result =
+                await _repository.UpdateTdsMaster(
+                    request,
+                    serviceUser);
+
+            if (result == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            response.Result = result;
+
+            return response;
+        }
+
+
+        // ============================================================
+        // DELETE TDS MASTER
+        // ============================================================
+        public async Task<SimpleResponse> DeleteTdsMaster(
+            int tdsRateId,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            if (tdsRateId <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            DeleteTdsMasterResponse? result =
+                await _repository.DeleteTdsMaster(
+                    tdsRateId,
+                    serviceUser);
+
+            if (result == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            response.Result = result;
+
+            return response;
+        }
+
+
+        // ============================================================
+        // GET TDS MASTER BY ID
+        // ============================================================
+        public async Task<SimpleResponse> GetTdsMasterByID(
+            int tdsRateId,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            if (tdsRateId <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            GetTdsMasterResponse? result =
+                await _repository.GetTdsMasterByID(
+                    tdsRateId,
+                    serviceUser);
+
+            if (result == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            response.Result = result;
+
+            return response;
+        }
+
+
+        // ============================================================
+        // GET ALL TDS MASTER
+        // ============================================================
+        public async Task<SimpleResponse> GetTdsMasters(
+            GetTdsMasterRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            request ??= new GetTdsMasterRequest();
+
+            List<GetTdsMasterResponse> result =
+                await _repository.GetTdsMasters(
+                    request,
+                    serviceUser);
+
+            response.Result = result;
+
+            return response;
+        }
+        // ============================================================
+        // CREATE COMMISSION DISTRIBUTION SETUP
+        // ============================================================
+        public async Task<SimpleResponse> CreateCommissionDistributionSetup(
+            CreateCommissionDistributionSetupRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            if (request == null ||
+                request.AgencyId <= 0 ||
+                request.ServiceId <= 0 ||
+                request.PlanId <= 0 ||
+                request.CalculationTypeId <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            if (request.AgancyValue < 0 ||
+                request.OrgValue < 0 ||
+                request.MdsValue < 0 ||
+                request.DSValue < 0 ||
+                request.AgentValue < 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            long result =
+                await _repository.CreateCommissionDistributionSetup(
+                    request,
+                    serviceUser);
+
+            response.Result = result;
+
+            return response;
+        }
+
+
+        // ============================================================
+        // UPDATE COMMISSION DISTRIBUTION SETUP
+        // ============================================================
+        public async Task<SimpleResponse> UpdateCommissionDistributionSetup(
+            UpdateCommissionDistributionSetupRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            if (request == null ||
+                request.DistributionId <= 0 ||
+                request.AgencyId <= 0 ||
+                request.ServiceId <= 0 ||
+                request.PlanId <= 0 ||
+                request.CalculationTypeId <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            if (request.AgancyValue < 0 ||
+                request.OrgValue < 0 ||
+                request.MdsValue < 0 ||
+                request.DSValue < 0 ||
+                request.AgentValue < 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            UpdateCommissionDistributionSetupResponse? result =
+                await _repository.UpdateCommissionDistributionSetup(
+                    request,
+                    serviceUser);
+
+            if (result == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            response.Result = result;
+
+            return response;
+        }
+
+
+        // ============================================================
+        // DELETE COMMISSION DISTRIBUTION SETUP
+        // ============================================================
+        public async Task<SimpleResponse> DeleteCommissionDistributionSetup(
+            long distributionId,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            if (distributionId <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            DeleteCommissionDistributionSetupResponse? result =
+                await _repository.DeleteCommissionDistributionSetup(
+                    distributionId,
+                    serviceUser);
+
+            if (result == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            response.Result = result;
+
+            return response;
+        }
+
+
+        // ============================================================
+        // GET COMMISSION DISTRIBUTION SETUP BY ID
+        // ============================================================
+        public async Task<SimpleResponse> GetCommissionDistributionSetupByID(
+            long distributionId,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            if (distributionId <= 0)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            GetCommissionDistributionSetupResponse? result =
+                await _repository.GetCommissionDistributionSetupByID(
+                    distributionId,
+                    serviceUser);
+
+            if (result == null)
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            response.Result = result;
+
+            return response;
+        }
+
+
+        // ============================================================
+        // GET ALL / FILTER COMMISSION DISTRIBUTION SETUPS
+        // ============================================================
+        public async Task<SimpleResponse> GetCommissionDistributionSetups(
+            GetCommissionDistributionSetupRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            request ??= new GetCommissionDistributionSetupRequest();
+
+            // Validate optional filters only when supplied
+            if ((request.AgencyId.HasValue &&
+                 request.AgencyId.Value <= 0) ||
+
+                (request.ServiceId.HasValue &&
+                 request.ServiceId.Value <= 0) ||
+
+                (request.PlanId.HasValue &&
+                 request.PlanId.Value <= 0) ||
+
+                (request.CalculationTypeId.HasValue &&
+                 request.CalculationTypeId.Value <= 0))
+            {
+                response.SetError(ErrorCodes.SP_133);
+                return response;
+            }
+
+            List<GetCommissionDistributionSetupResponse> result =
+                await _repository.GetCommissionDistributionSetups(
+                    request,
+                    serviceUser);
+
+            response.Result = result;
+
+            return response;
+        }
     }
 }

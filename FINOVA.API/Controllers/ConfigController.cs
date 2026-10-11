@@ -1016,5 +1016,434 @@ namespace FINOVA.API.Controllers
 
             return Json(response);
         }
+        // ============================================================
+        // CREATE SERVICE AGENCY CHARGE
+        // ============================================================
+        [HttpPost("CreateServiceAgencyCharge")]
+        public async Task<IActionResult> CreateServiceAgencyCharge(
+            [FromBody] CreateServiceAgencyChargeRequest request)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.CreateServiceAgencyCharge(
+                    request,
+                    CallerUser);
+
+            return Json(response);
+        }
+
+
+        // ============================================================
+        // UPDATE SERVICE AGENCY CHARGE
+        // ============================================================
+        [HttpPut("UpdateServiceAgencyCharge")]
+        public async Task<IActionResult> UpdateServiceAgencyCharge(
+            [FromBody] UpdateServiceAgencyChargeRequest request)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.UpdateServiceAgencyCharge(
+                    request,
+                    CallerUser);
+
+            return Json(response);
+        }
+
+
+        // ============================================================
+        // DELETE SERVICE AGENCY CHARGE
+        // ============================================================
+        [HttpDelete("DeleteServiceAgencyCharge/{mappingId}")]
+        public async Task<IActionResult> DeleteServiceAgencyCharge(
+            long mappingId)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.DeleteServiceAgencyCharge(
+                    mappingId,
+                    CallerUser);
+
+            return Json(response);
+        }
+
+
+        // ============================================================
+        // GET SERVICE AGENCY CHARGE BY ID
+        // ============================================================
+        [HttpGet("GetServiceAgencyChargeByID/{mappingId}")]
+        public async Task<IActionResult> GetServiceAgencyChargeByID(
+            long mappingId)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.GetServiceAgencyChargeByID(
+                    mappingId,
+                    CallerUser);
+
+            return Json(response);
+        }
+
+
+        // ============================================================
+        // GET SERVICE AGENCY CHARGE LIST
+        // ============================================================
+        [HttpPost("GetServiceAgencyCharges")]
+        public async Task<IActionResult> GetServiceAgencyCharges(
+            [FromBody] GetServiceAgencyChargeRequest request)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.GetServiceAgencyCharges(
+                    request,
+                    CallerUser);
+
+            return Json(response);
+        }
+        // ============================================================
+        // CREATE TDS MASTER
+        // ============================================================
+        [HttpPost("CreateTdsMaster")]
+        public async Task<IActionResult> CreateTdsMaster(
+            [FromBody] CreateTdsMasterRequest request)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.CreateTdsMaster(
+                    request,
+                    CallerUser);
+
+            return Json(response);
+        }
+
+
+        // ============================================================
+        // UPDATE TDS MASTER
+        // ============================================================
+        [HttpPut("UpdateTdsMaster")]
+        public async Task<IActionResult> UpdateTdsMaster(
+            [FromBody] UpdateTdsMasterRequest request)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.UpdateTdsMaster(
+                    request,
+                    CallerUser);
+
+            return Json(response);
+        }
+
+
+        // ============================================================
+        // DELETE TDS MASTER
+        // ============================================================
+        [HttpDelete("DeleteTdsMaster/{tdsRateId}")]
+        public async Task<IActionResult> DeleteTdsMaster(
+            int tdsRateId)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.DeleteTdsMaster(
+                    tdsRateId,
+                    CallerUser);
+
+            return Json(response);
+        }
+
+
+        // ============================================================
+        // GET TDS MASTER BY ID
+        // ============================================================
+        [HttpGet("GetTdsMasterByID/{tdsRateId}")]
+        public async Task<IActionResult> GetTdsMasterByID(
+            int tdsRateId)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.GetTdsMasterByID(
+                    tdsRateId,
+                    CallerUser);
+
+            return Json(response);
+        }
+
+
+        // ============================================================
+        // GET ALL / FILTER TDS MASTER
+        // ============================================================
+        [HttpPost("GetTdsMasters")]
+        public async Task<IActionResult> GetTdsMasters(
+            [FromBody] GetTdsMasterRequest request)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.GetTdsMasters(
+                    request,
+                    CallerUser);
+
+            return Json(response);
+        }
+        // ============================================================
+        // CREATE COMMISSION DISTRIBUTION SETUP
+        // ============================================================
+        [HttpPost("CreateCommissionDistributionSetup")]
+        public async Task<IActionResult> CreateCommissionDistributionSetup(
+            [FromBody] CreateCommissionDistributionSetupRequest request)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.CreateCommissionDistributionSetup(
+                    request,
+                    CallerUser);
+
+            return Json(response);
+        }
+
+
+        // ============================================================
+        // UPDATE COMMISSION DISTRIBUTION SETUP
+        // ============================================================
+        [HttpPut("UpdateCommissionDistributionSetup")]
+        public async Task<IActionResult> UpdateCommissionDistributionSetup(
+            [FromBody] UpdateCommissionDistributionSetupRequest request)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.UpdateCommissionDistributionSetup(
+                    request,
+                    CallerUser);
+
+            return Json(response);
+        }
+
+
+        // ============================================================
+        // DELETE COMMISSION DISTRIBUTION SETUP
+        // ============================================================
+        [HttpDelete("DeleteCommissionDistributionSetup/{distributionId}")]
+        public async Task<IActionResult> DeleteCommissionDistributionSetup(
+            long distributionId)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.DeleteCommissionDistributionSetup(
+                    distributionId,
+                    CallerUser);
+
+            return Json(response);
+        }
+
+
+        // ============================================================
+        // GET COMMISSION DISTRIBUTION SETUP BY ID
+        // ============================================================
+        [HttpGet("GetCommissionDistributionSetupByID/{distributionId}")]
+        public async Task<IActionResult> GetCommissionDistributionSetupByID(
+            long distributionId)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.GetCommissionDistributionSetupByID(
+                    distributionId,
+                    CallerUser);
+
+            return Json(response);
+        }
+
+
+        // ============================================================
+        // GET ALL / FILTER COMMISSION DISTRIBUTION SETUPS
+        // ============================================================
+        [HttpPost("GetCommissionDistributionSetups")]
+        public async Task<IActionResult> GetCommissionDistributionSetups(
+            [FromBody] GetCommissionDistributionSetupRequest request)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            response =
+                await _Provider.GetCommissionDistributionSetups(
+                    request,
+                    CallerUser);
+
+            return Json(response);
+        }
     }
 }

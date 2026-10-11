@@ -195,4 +195,119 @@ namespace FINOVA.DataModel.Masters
         public string? CodePrefix { get; set; }
         public int? Status { get; set; }
     }
+    public class CreateServiceAgencyChargeRequest
+    {
+        public int? AgencyID { get; set; }
+        public int? ServiceID { get; set; }
+        public int? SlabTypeId { get; set; }
+        public int? CalculationTypeId { get; set; }
+
+        public decimal FromAmount { get; set; }
+        public decimal ToAmount { get; set; }
+        public decimal CalculationValue { get; set; }
+
+        public int Status { get; set; } = 1;
+    }
+
+    public class UpdateServiceAgencyChargeRequest
+    {
+        public long MappingId { get; set; }
+
+        public int? AgencyID { get; set; }
+        public int? ServiceID { get; set; }
+        public int? SlabTypeId { get; set; }
+        public int? CalculationTypeId { get; set; }
+
+        public decimal FromAmount { get; set; }
+        public decimal ToAmount { get; set; }
+        public decimal CalculationValue { get; set; }
+
+        public int Status { get; set; }
+    }
+
+    public class GetServiceAgencyChargeRequest
+    {
+        public int? AgencyID { get; set; }
+        public int? ServiceID { get; set; }
+        public int? SlabTypeId { get; set; }
+        public int? CalculationTypeId { get; set; }
+        public int? Status { get; set; }
+    }
+
+
+    public class CreateTdsMasterRequest
+    {
+        public bool IsPanAvailable { get; set; }
+
+        public decimal TdsRate { get; set; }
+
+        public string? Remarks { get; set; }
+
+        public int Stratus { get; set; } = 1;
+    }
+
+
+    public class UpdateTdsMasterRequest
+    {
+        public int TdsRateId { get; set; }
+
+        public bool IsPanAvailable { get; set; }
+
+        public decimal TdsRate { get; set; }
+
+        public string? Remarks { get; set; }
+
+        public int Stratus { get; set; }
+    }
+
+
+    public class GetTdsMasterRequest
+    {
+        public bool? IsPanAvailable { get; set; }
+
+        public int? Stratus { get; set; }
+    }
+    public class CreateCommissionDistributionSetupRequest
+    {
+        public int AgencyId { get; set; }
+        public int ServiceId { get; set; }
+        public int PlanId { get; set; }
+        public int CalculationTypeId { get; set; }
+
+        public decimal AgancyValue { get; set; }
+        public decimal OrgValue { get; set; }
+        public decimal MdsValue { get; set; }
+        public decimal DSValue { get; set; }
+        public decimal AgentValue { get; set; }
+
+        public int Status { get; set; } = 1;
+    }
+
+
+    public class UpdateCommissionDistributionSetupRequest
+    {
+        public long DistributionId { get; set; }
+
+        public int AgencyId { get; set; }
+        public int ServiceId { get; set; }
+        public int PlanId { get; set; }
+        public int CalculationTypeId { get; set; }
+
+        public decimal AgancyValue { get; set; }
+        public decimal OrgValue { get; set; }
+        public decimal MdsValue { get; set; }
+        public decimal DSValue { get; set; }
+        public decimal AgentValue { get; set; }
+
+        public int Status { get; set; }
+    }
+
+
+    public class GetCommissionDistributionSetupRequest
+    {
+        public int? AgencyId { get; set; }
+        public int? ServiceId { get; set; }
+        public int? PlanId { get; set; }
+        public int? CalculationTypeId { get; set; }
+    }
 }

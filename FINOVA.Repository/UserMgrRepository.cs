@@ -3448,5 +3448,604 @@ namespace FINOVA.Repository
 
             return response;
         }
+        public async Task<long> CreateUserWallet(
+    CreateUserWalletRequest request,
+    IFINOVAServiceUser serviceUser)
+        {
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[USR].[UserWallet_Create]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@UserMasterId",
+                request.UserMasterId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@AvailableLimit",
+                request.AvailableLimit);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@ThresoldLimit",
+                request.ThresoldLimit);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@RemarkReason",
+                request.RemarkReason);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@Status",
+                request.Status);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@CreatedBy",
+                serviceUser.UserMasterID);
+
+            _database.AddOutParameter(
+                dbCommand,
+                "@Out_ID",
+                System.Data.DbType.Int64,
+                sizeof(long));
+
+            await _database.ExecuteNonQueryAsync(dbCommand);
+
+            return Convert.ToInt64(
+                _database.GetParameterValue(
+                    dbCommand,
+                    "@Out_ID"));
+        }
+        public async Task<UpdateUserWalletResponse?>
+    UpdateUserWallet(
+        UpdateUserWalletRequest request,
+        IFINOVAServiceUser serviceUser)
+        {
+            UpdateUserWalletResponse? response = null;
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[USR].[UserWallet_Update]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@UserDetailId",
+                request.UserDetailId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@UserMasterId",
+                request.UserMasterId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@AvailableLimit",
+                request.AvailableLimit);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@ThresoldLimit",
+                request.ThresoldLimit);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@RemarkReason",
+                request.RemarkReason);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@Status",
+                request.Status);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@UpdatedBy",
+                serviceUser.UserMasterID);
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(dbCommand))
+            {
+                if (dataReader.Read())
+                {
+                    response = new UpdateUserWalletResponse
+                    {
+                        UserDetailId =
+                            GetInt64Value(
+                                dataReader,
+                                "UserDetailId") ?? 0,
+
+                        IsUpdated =
+                            dataReader["IsUpdated"] != DBNull.Value &&
+                            Convert.ToBoolean(
+                                dataReader["IsUpdated"]),
+
+                        Message =
+                            GetStringValue(
+                                dataReader,
+                                "Message")
+                    };
+                }
+            }
+
+            return response;
+        }
+        public async Task<DeleteUserWalletResponse?>
+    DeleteUserWallet(
+        long userDetailId,
+        IFINOVAServiceUser serviceUser)
+        {
+            DeleteUserWalletResponse? response = null;
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[USR].[UserWallet_Delete]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@UserDetailId",
+                userDetailId);
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(dbCommand))
+            {
+                if (dataReader.Read())
+                {
+                    response = new DeleteUserWalletResponse
+                    {
+                        UserDetailId =
+                            GetInt64Value(
+                                dataReader,
+                                "UserDetailId") ?? 0,
+
+                        IsDeleted =
+                            dataReader["IsDeleted"] != DBNull.Value &&
+                            Convert.ToBoolean(
+                                dataReader["IsDeleted"]),
+
+                        Message =
+                            GetStringValue(
+                                dataReader,
+                                "Message")
+                    };
+                }
+            }
+
+            return response;
+        }
+        public async Task<GetUserWalletResponse?>
+    GetUserWalletByID(
+        long userDetailId,
+        IFINOVAServiceUser serviceUser)
+        {
+            GetUserWalletResponse? response = null;
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[USR].[UserWallet_GetByID]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@UserDetailId",
+                userDetailId);
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(dbCommand))
+            {
+                if (dataReader.Read())
+                {
+                    response =
+                        MapUserWallet(dataReader);
+                }
+            }
+
+            return response;
+        }
+        public async Task<List<GetUserWalletResponse>>
+    GetUserWallets(
+        GetUserWalletRequest request,
+        IFINOVAServiceUser serviceUser)
+        {
+            List<GetUserWalletResponse> response =
+                new List<GetUserWalletResponse>();
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[USR].[UserWallet_GetAll]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@UserMasterId",
+                request.UserMasterId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@Status",
+                request.Status);
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(dbCommand))
+            {
+                while (dataReader.Read())
+                {
+                    response.Add(
+                        MapUserWallet(dataReader));
+                }
+            }
+
+            return response;
+        }
+        private GetUserWalletResponse MapUserWallet(
+    System.Data.IDataReader dataReader)
+        {
+            GetUserWalletResponse row =
+                new GetUserWalletResponse();
+
+            row.UserDetailId =
+                GetInt64Value(
+                    dataReader,
+                    "UserDetailId") ?? 0;
+
+            row.UserMasterId =
+                GetInt64Value(
+                    dataReader,
+                    "UserMasterId");
+
+            row.UserName =
+                GetStringValue(
+                    dataReader,
+                    "UserName");
+
+            row.AvailableLimit =
+                dataReader["AvailableLimit"] == DBNull.Value
+                    ? 0
+                    : Convert.ToDecimal(
+                        dataReader["AvailableLimit"]);
+
+            row.ThresoldLimit =
+                dataReader["ThresoldLimit"] == DBNull.Value
+                    ? 0
+                    : Convert.ToDecimal(
+                        dataReader["ThresoldLimit"]);
+
+            row.RemarkReason =
+                GetStringValue(
+                    dataReader,
+                    "RemarkReason");
+
+            row.Status =
+                GetInt32Value(
+                    dataReader,
+                    "Status") ?? 0;
+
+            row.StatusName =
+                GetStringValue(
+                    dataReader,
+                    "StatusName");
+
+            row.CreatedOn =
+                dataReader["CreatedOn"] == DBNull.Value
+                    ? (DateTime?)null
+                    : Convert.ToDateTime(
+                        dataReader["CreatedOn"]);
+
+            row.CreatedBy =
+                GetInt64Value(
+                    dataReader,
+                    "CreatedBy") ?? 0;
+
+            row.CreatedByName =
+                GetStringValue(
+                    dataReader,
+                    "CreatedByName");
+
+            row.UpdatedOn =
+                dataReader["UpdatedOn"] == DBNull.Value
+                    ? (DateTime?)null
+                    : Convert.ToDateTime(
+                        dataReader["UpdatedOn"]);
+
+            row.UpdatedBy =
+                GetInt64Value(
+                    dataReader,
+                    "UpdatedBy");
+
+            row.UpdatedByName =
+                GetStringValue(
+                    dataReader,
+                    "UpdatedByName");
+
+            return row;
+        }
+        public async Task<UpdateUserWalletThresoldLimitResponse?>
+    UpdateUserWalletThresoldLimit(
+        UpdateUserWalletThresoldLimitRequest request,
+        IFINOVAServiceUser serviceUser)
+        {
+            UpdateUserWalletThresoldLimitResponse? response = null;
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[USR].[UserWallet_UpdateThresoldLimit]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@UserMasterId",
+                request.UserMasterId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@ThresoldLimit",
+                request.ThresoldLimit);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@ThresoldReason",
+                request.ThresoldReason);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@ThresoldBy",
+                serviceUser.UserMasterID);
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(dbCommand))
+            {
+                if (dataReader.Read())
+                {
+                    response =
+                        new UpdateUserWalletThresoldLimitResponse
+                        {
+                            UserDetailId =
+                                GetInt64Value(
+                                    dataReader,
+                                    "UserDetailId") ?? 0,
+
+                            UserMasterId =
+                                GetInt64Value(
+                                    dataReader,
+                                    "UserMasterId") ?? 0,
+
+                            AvailableLimit =
+                                dataReader["AvailableLimit"] == DBNull.Value
+                                    ? 0
+                                    : Convert.ToDecimal(
+                                        dataReader["AvailableLimit"]),
+
+                            ThresoldLimit =
+                                dataReader["ThresoldLimit"] == DBNull.Value
+                                    ? 0
+                                    : Convert.ToDecimal(
+                                        dataReader["ThresoldLimit"]),
+
+                            ThresoldOn =
+                                dataReader["ThresoldOn"] == DBNull.Value
+                                    ? (DateTime?)null
+                                    : Convert.ToDateTime(
+                                        dataReader["ThresoldOn"]),
+
+                            ThresoldBy =
+                                GetInt64Value(
+                                    dataReader,
+                                    "ThresoldBy"),
+
+                            ThresoldReason =
+                                GetStringValue(
+                                    dataReader,
+                                    "ThresoldReason"),
+
+                            IsUpdated =
+                                dataReader["IsUpdated"] != DBNull.Value &&
+                                Convert.ToBoolean(
+                                    dataReader["IsUpdated"]),
+
+                            Message =
+                                GetStringValue(
+                                    dataReader,
+                                    "Message")
+                        };
+                }
+            }
+
+            return response;
+        }
+        public async Task<List<GetThresoldUserListResponse>>
+    GetThresoldUserList(
+        GetThresoldUserListRequest request,
+        IFINOVAServiceUser serviceUser)
+        {
+            List<GetThresoldUserListResponse> response =
+                new List<GetThresoldUserListResponse>();
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[USR].[UserWallet_GetThresoldUserList]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@OrganizationID",
+                request.OrganizationID);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@UserTypeId",
+                request.UserTypeId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@ParentId",
+                request.ParentId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@Status",
+                request.Status);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@SearchText",
+                request.SearchText);
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(dbCommand))
+            {
+                while (dataReader.Read())
+                {
+                    response.Add(
+                        MapThresoldUserList(dataReader));
+                }
+            }
+
+            return response;
+        }
+        private GetThresoldUserListResponse MapThresoldUserList(
+    System.Data.IDataReader dataReader)
+        {
+            GetThresoldUserListResponse row =
+                new GetThresoldUserListResponse();
+
+            // User Details
+            row.UserMasterID =
+                GetInt64Value(
+                    dataReader,
+                    "UserMasterID") ?? 0;
+
+            row.ParentId =
+                GetInt64Value(
+                    dataReader,
+                    "ParentId");
+
+            row.UserTypeId =
+                GetInt32Value(
+                    dataReader,
+                    "UserTypeId");
+
+            row.OrganizationID =
+                GetInt32Value(
+                    dataReader,
+                    "OrganizationID") ?? 0;
+
+            row.UserName =
+                GetStringValue(
+                    dataReader,
+                    "UserName");
+
+            row.Title =
+                GetStringValue(
+                    dataReader,
+                    "Title");
+
+            row.FirstName =
+                GetStringValue(
+                    dataReader,
+                    "FirstName");
+
+            row.MiddleName =
+                GetStringValue(
+                    dataReader,
+                    "MiddleName");
+
+            row.LastName =
+                GetStringValue(
+                    dataReader,
+                    "LastName");
+
+            row.FullName =
+                GetStringValue(
+                    dataReader,
+                    "FullName");
+
+            row.DisplayName =
+                GetStringValue(
+                    dataReader,
+                    "DisplayName");
+
+            row.EmailId =
+                GetStringValue(
+                    dataReader,
+                    "EmailId");
+
+            row.MobileNo =
+                GetStringValue(
+                    dataReader,
+                    "MobileNo");
+
+            // User Status
+            row.UserStatus =
+                GetInt32Value(
+                    dataReader,
+                    "UserStatus") ?? 0;
+
+            row.UserStatusName =
+                GetStringValue(
+                    dataReader,
+                    "UserStatusName");
+
+            // Wallet Details
+            row.UserDetailId =
+                GetInt64Value(
+                    dataReader,
+                    "UserDetailId");
+
+            row.AvailableLimit =
+                dataReader["AvailableLimit"] == DBNull.Value
+                    ? 0
+                    : Convert.ToDecimal(
+                        dataReader["AvailableLimit"]);
+
+            row.ThresoldLimit =
+                dataReader["ThresoldLimit"] == DBNull.Value
+                    ? 0
+                    : Convert.ToDecimal(
+                        dataReader["ThresoldLimit"]);
+
+            // Threshold Details
+            row.ThresoldOn =
+                dataReader["ThresoldOn"] == DBNull.Value
+                    ? (DateTime?)null
+                    : Convert.ToDateTime(
+                        dataReader["ThresoldOn"]);
+
+            row.ThresoldBy =
+                GetInt64Value(
+                    dataReader,
+                    "ThresoldBy");
+
+            row.ThresoldReason =
+                GetStringValue(
+                    dataReader,
+                    "ThresoldReason");
+
+            // Wallet Status
+            row.WalletStatus =
+                GetInt32Value(
+                    dataReader,
+                    "WalletStatus");
+
+            row.WalletStatusName =
+                GetStringValue(
+                    dataReader,
+                    "WalletStatusName");
+
+            // Threshold Changed By
+            row.ThresoldByUserName =
+                GetStringValue(
+                    dataReader,
+                    "ThresoldByUserName");
+
+            row.UserTypeName =
+               GetStringValue(
+                   dataReader,
+                   "UserTypeName");
+
+            row.ThresoldByName =
+                GetStringValue(
+                    dataReader,
+                    "ThresoldByName");
+
+            return row;
+        }
     }
 }

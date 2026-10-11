@@ -317,7 +317,7 @@ namespace FINOVA.Repository
             return outputstr;
 
         }
-        
+
         public async Task<SimpleResponse> GetServicePolicy(GetServicePolicyRequest request)
         {
             SimpleResponse response = new SimpleResponse();
@@ -2017,6 +2017,1120 @@ namespace FINOVA.Repository
                 GetStringValue(
                     dataReader,
                     "StatusName");
+
+            return row;
+        }
+        public async Task<long> CreateServiceAgencyCharge(
+    CreateServiceAgencyChargeRequest request,
+    IFINOVAServiceUser serviceUser)
+        {
+            long mappingId = 0;
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[CONFG].[ServiceAgencyChargeMaster_Create]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@AgencyID",
+                request.AgencyID);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@ServiceID",
+                request.ServiceID);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@SlabTypeId",
+                request.SlabTypeId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@CalculationTypeId",
+                request.CalculationTypeId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@FromAmount",
+                request.FromAmount);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@ToAmount",
+                request.ToAmount);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@CalculationValue",
+                request.CalculationValue);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@Status",
+                request.Status);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@CreratedBy",
+                serviceUser.UserMasterID);
+
+            _database.AddOutParameter(
+                dbCommand,
+                "@Out_ID",
+                System.Data.DbType.Int64,
+                sizeof(long));
+
+            await _database.ExecuteNonQueryAsync(dbCommand);
+
+            mappingId =
+                Convert.ToInt64(
+                    _database.GetParameterValue(
+                        dbCommand,
+                        "@Out_ID"));
+
+            return mappingId;
+        }
+        public async Task<UpdateServiceAgencyChargeResponse?>
+    UpdateServiceAgencyCharge(
+        UpdateServiceAgencyChargeRequest request,
+        IFINOVAServiceUser serviceUser)
+        {
+            UpdateServiceAgencyChargeResponse? response = null;
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[CONFG].[ServiceAgencyChargeMaster_Update]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@MappingId",
+                request.MappingId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@AgencyID",
+                request.AgencyID);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@ServiceID",
+                request.ServiceID);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@SlabTypeId",
+                request.SlabTypeId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@CalculationTypeId",
+                request.CalculationTypeId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@FromAmount",
+                request.FromAmount);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@ToAmount",
+                request.ToAmount);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@CalculationValue",
+                request.CalculationValue);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@Status",
+                request.Status);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@UpdatedBy",
+                serviceUser.UserMasterID);
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(dbCommand))
+            {
+                if (dataReader.Read())
+                {
+                    response =
+                        new UpdateServiceAgencyChargeResponse
+                        {
+                            MappingId =
+                                GetInt64Value(
+                                    dataReader,
+                                    "MappingId") ?? 0,
+
+                            IsUpdated =
+                                dataReader["IsUpdated"] != DBNull.Value &&
+                                Convert.ToBoolean(
+                                    dataReader["IsUpdated"]),
+
+                            Message =
+                                GetStringValue(
+                                    dataReader,
+                                    "Message")
+                        };
+                }
+            }
+
+            return response;
+        }
+        public async Task<DeleteServiceAgencyChargeResponse?>
+    DeleteServiceAgencyCharge(
+        long mappingId,
+        IFINOVAServiceUser serviceUser)
+        {
+            DeleteServiceAgencyChargeResponse? response = null;
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[CONFG].[ServiceAgencyChargeMaster_Delete]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@MappingId",
+                mappingId);
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(dbCommand))
+            {
+                if (dataReader.Read())
+                {
+                    response =
+                        new DeleteServiceAgencyChargeResponse
+                        {
+                            MappingId =
+                                GetInt64Value(
+                                    dataReader,
+                                    "MappingId") ?? 0,
+
+                            IsDeleted =
+                                dataReader["IsDeleted"] != DBNull.Value &&
+                                Convert.ToBoolean(
+                                    dataReader["IsDeleted"]),
+
+                            Message =
+                                GetStringValue(
+                                    dataReader,
+                                    "Message")
+                        };
+                }
+            }
+
+            return response;
+        }
+        public async Task<GetServiceAgencyChargeResponse?>
+    GetServiceAgencyChargeByID(
+        long mappingId,
+        IFINOVAServiceUser serviceUser)
+        {
+            GetServiceAgencyChargeResponse? response = null;
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[CONFG].[ServiceAgencyChargeMaster_GetByID]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@MappingId",
+                mappingId);
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(dbCommand))
+            {
+                if (dataReader.Read())
+                {
+                    response =
+                        MapServiceAgencyCharge(dataReader);
+                }
+            }
+
+            return response;
+        }
+        public async Task<List<GetServiceAgencyChargeResponse>>
+    GetServiceAgencyCharges(
+        GetServiceAgencyChargeRequest request,
+        IFINOVAServiceUser serviceUser)
+        {
+            List<GetServiceAgencyChargeResponse> response =
+                new List<GetServiceAgencyChargeResponse>();
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[CONFG].[ServiceAgencyChargeMaster_GetAll]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@AgencyID",
+                request.AgencyID);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@ServiceID",
+                request.ServiceID);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@SlabTypeId",
+                request.SlabTypeId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@CalculationTypeId",
+                request.CalculationTypeId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@Status",
+                request.Status);
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(dbCommand))
+            {
+                while (dataReader.Read())
+                {
+                    response.Add(
+                        MapServiceAgencyCharge(dataReader));
+                }
+            }
+
+            return response;
+        }
+        private GetServiceAgencyChargeResponse MapServiceAgencyCharge(
+       System.Data.IDataReader dataReader)
+        {
+            GetServiceAgencyChargeResponse row =
+                new GetServiceAgencyChargeResponse();
+
+            // ========================================================
+            // MAPPING
+            // ========================================================
+
+            row.MappingId =
+                GetInt64Value(
+                    dataReader,
+                    "MappingId") ?? 0;
+
+
+            // ========================================================
+            // AGENCY
+            // ========================================================
+
+            row.AgencyID =
+                GetInt32Value(
+                    dataReader,
+                    "AgencyID");
+
+            row.AgencyName =
+                GetStringValue(
+                    dataReader,
+                    "AgencyName");
+
+
+            // ========================================================
+            // SERVICE
+            // ========================================================
+
+            row.ServiceID =
+                GetInt32Value(
+                    dataReader,
+                    "ServiceID");
+
+            row.ServiceName =
+                GetStringValue(
+                    dataReader,
+                    "ServiceName");
+
+
+            // ========================================================
+            // SLAB / SERVICE TYPE
+            // ========================================================
+
+            row.SlabTypeId =
+                GetInt32Value(
+                    dataReader,
+                    "SlabTypeId");
+
+            row.ServiceTypeName =
+                GetStringValue(
+                    dataReader,
+                    "ServiceTypeName");
+
+
+            // ========================================================
+            // CALCULATION TYPE
+            // ========================================================
+
+            row.CalculationTypeId =
+                GetInt32Value(
+                    dataReader,
+                    "CalculationTypeId");
+
+            row.CalculationTypeName =
+                GetStringValue(
+                    dataReader,
+                    "CalculationTypeName");
+
+
+            // ========================================================
+            // AMOUNT / CALCULATION
+            // ========================================================
+
+            row.FromAmount =
+                dataReader["FromAmount"] == DBNull.Value
+                    ? 0
+                    : Convert.ToDecimal(
+                        dataReader["FromAmount"]);
+
+            row.ToAmount =
+                dataReader["ToAmount"] == DBNull.Value
+                    ? 0
+                    : Convert.ToDecimal(
+                        dataReader["ToAmount"]);
+
+            row.CalculationValue =
+                dataReader["CalculationValue"] == DBNull.Value
+                    ? 0
+                    : Convert.ToDecimal(
+                        dataReader["CalculationValue"]);
+
+
+            // ========================================================
+            // STATUS
+            // ========================================================
+
+            row.Status =
+                GetInt32Value(
+                    dataReader,
+                    "Status") ?? 0;
+
+            row.StatusName =
+                GetStringValue(
+                    dataReader,
+                    "StatusName");
+
+
+            // ========================================================
+            // CREATED
+            // ========================================================
+
+            row.CreratedOn =
+                dataReader["CreratedOn"] == DBNull.Value
+                    ? (DateTime?)null
+                    : Convert.ToDateTime(
+                        dataReader["CreratedOn"]);
+
+            row.CreratedBy =
+                GetInt64Value(
+                    dataReader,
+                    "CreratedBy") ?? 0;
+
+
+            // ========================================================
+            // UPDATED
+            // ========================================================
+
+            row.UpdatedOn =
+                dataReader["UpdatedOn"] == DBNull.Value
+                    ? (DateTime?)null
+                    : Convert.ToDateTime(
+                        dataReader["UpdatedOn"]);
+
+            row.UpdatedBy =
+                GetInt64Value(
+                    dataReader,
+                    "UpdatedBy");
+            row.UpdatedByName =
+               GetStringValue(
+                   dataReader,
+                   "UpdatedByName");
+            row.CreatedByName =
+               GetStringValue(
+                   dataReader,
+                   "CreatedByName");
+
+            return row;
+        }
+        public async Task<int> CreateTdsMaster(
+       CreateTdsMasterRequest request,
+       IFINOVAServiceUser serviceUser)
+        {
+            int tdsRateId = 0;
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[CONFG].[TdsMaster_Create]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@isPanAvailable",
+                request.IsPanAvailable);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@TdsRate",
+                request.TdsRate);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@Remarks",
+                request.Remarks);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@Stratus",
+                request.Stratus);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@CreatedBy",
+                serviceUser.UserMasterID);
+
+            _database.AddOutParameter(
+                dbCommand,
+                "@Out_ID",
+                System.Data.DbType.Int32,
+                sizeof(int));
+
+            await _database.ExecuteNonQueryAsync(dbCommand);
+
+            tdsRateId =
+                Convert.ToInt32(
+                    _database.GetParameterValue(
+                        dbCommand,
+                        "@Out_ID"));
+
+            return tdsRateId;
+        }
+        public async Task<UpdateTdsMasterResponse?> UpdateTdsMaster(
+       UpdateTdsMasterRequest request,
+       IFINOVAServiceUser serviceUser)
+        {
+            UpdateTdsMasterResponse? response = null;
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[CONFG].[TdsMaster_Update]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@TdsRateId",
+                request.TdsRateId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@isPanAvailable",
+                request.IsPanAvailable);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@TdsRate",
+                request.TdsRate);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@Remarks",
+                request.Remarks);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@Stratus",
+                request.Stratus);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@UpdatedBy",
+                serviceUser.UserMasterID);
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(dbCommand))
+            {
+                if (dataReader.Read())
+                {
+                    response = new UpdateTdsMasterResponse
+                    {
+                        TdsRateId =
+                            GetInt32Value(
+                                dataReader,
+                                "TdsRateId") ?? 0,
+
+                        IsUpdated =
+                            dataReader["IsUpdated"] != DBNull.Value &&
+                            Convert.ToBoolean(
+                                dataReader["IsUpdated"]),
+
+                        Message =
+                            GetStringValue(
+                                dataReader,
+                                "Message")
+                    };
+                }
+            }
+
+            return response;
+        }
+        public async Task<DeleteTdsMasterResponse?> DeleteTdsMaster(
+        int tdsRateId,
+        IFINOVAServiceUser serviceUser)
+        {
+            DeleteTdsMasterResponse? response = null;
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[CONFG].[TdsMaster_Delete]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@TdsRateId",
+                tdsRateId);
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(dbCommand))
+            {
+                if (dataReader.Read())
+                {
+                    response = new DeleteTdsMasterResponse
+                    {
+                        TdsRateId =
+                            GetInt32Value(
+                                dataReader,
+                                "TdsRateId") ?? 0,
+
+                        IsDeleted =
+                            dataReader["IsDeleted"] != DBNull.Value &&
+                            Convert.ToBoolean(
+                                dataReader["IsDeleted"]),
+
+                        Message =
+                            GetStringValue(
+                                dataReader,
+                                "Message")
+                    };
+                }
+            }
+
+            return response;
+        }
+        public async Task<GetTdsMasterResponse?> GetTdsMasterByID(
+         int tdsRateId,
+         IFINOVAServiceUser serviceUser)
+        {
+            GetTdsMasterResponse? response = null;
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[CONFG].[TdsMaster_GetByID]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@TdsRateId",
+                tdsRateId);
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(dbCommand))
+            {
+                if (dataReader.Read())
+                {
+                    response = MapTdsMaster(dataReader);
+                }
+            }
+
+            return response;
+        }
+        public async Task<List<GetTdsMasterResponse>> GetTdsMasters(
+      GetTdsMasterRequest request,
+      IFINOVAServiceUser serviceUser)
+        {
+            List<GetTdsMasterResponse> response =
+                new List<GetTdsMasterResponse>();
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[CONFG].[TdsMaster_GetAll]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@isPanAvailable",
+                request.IsPanAvailable);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@Stratus",
+                request.Stratus);
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(dbCommand))
+            {
+                while (dataReader.Read())
+                {
+                    response.Add(
+                        MapTdsMaster(dataReader));
+                }
+            }
+
+            return response;
+        }
+        private GetTdsMasterResponse MapTdsMaster(
+        System.Data.IDataReader dataReader)
+        {
+            GetTdsMasterResponse row =
+                new GetTdsMasterResponse();
+
+            row.TdsRateId =
+                GetInt32Value(
+                    dataReader,
+                    "TdsRateId") ?? 0;
+
+            row.IsPanAvailable =
+                dataReader["isPanAvailable"] != DBNull.Value &&
+                Convert.ToBoolean(
+                    dataReader["isPanAvailable"]);
+
+            row.TdsRate =
+                dataReader["TdsRate"] == DBNull.Value
+                    ? 0
+                    : Convert.ToDecimal(
+                        dataReader["TdsRate"]);
+
+            row.Remarks =
+                GetStringValue(
+                    dataReader,
+                    "Remarks");
+
+            row.Stratus =
+                GetInt32Value(
+                    dataReader,
+                    "Stratus") ?? 0;
+
+            row.StatusName =
+                GetStringValue(
+                    dataReader,
+                    "StatusName");
+
+            // Created details
+            row.CreatedOn =
+                dataReader["CreatedOn"] == DBNull.Value
+                    ? (DateTime?)null
+                    : Convert.ToDateTime(
+                        dataReader["CreatedOn"]);
+
+            row.CreatedBy =
+                GetInt64Value(
+                    dataReader,
+                    "CreatedBy") ?? 0;
+
+            row.CreatedByName =
+                GetStringValue(
+                    dataReader,
+                    "CreatedByName");
+
+            // Updated details
+            row.UpdatedOn =
+                dataReader["UpdatedOn"] == DBNull.Value
+                    ? (DateTime?)null
+                    : Convert.ToDateTime(
+                        dataReader["UpdatedOn"]);
+
+            row.UpdatedBy =
+                GetInt64Value(
+                    dataReader,
+                    "UpdatedBy");
+
+            row.UpdatedByName =
+                GetStringValue(
+                    dataReader,
+                    "UpdatedByName");
+
+            return row;
+        }
+
+        public async Task<long> CreateCommissionDistributionSetup(
+    CreateCommissionDistributionSetupRequest request,
+    IFINOVAServiceUser serviceUser)
+        {
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[CONFG].[CommissionDistributionSetup_Create]");
+
+            _database.AddInParameter(
+                dbCommand, "@AgencyId", request.AgencyId);
+
+            _database.AddInParameter(
+                dbCommand, "@ServiceId", request.ServiceId);
+
+            _database.AddInParameter(
+                dbCommand, "@PlanId", request.PlanId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@CalculationTypeId",
+                request.CalculationTypeId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@AgancyValue",
+                request.AgancyValue);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@OrgValue",
+                request.OrgValue);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@MdsValue",
+                request.MdsValue);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@DSValue",
+                request.DSValue);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@AgentValue",
+                request.AgentValue);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@Status",
+                request.Status);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@CreatedBy",
+                serviceUser.UserMasterID);
+
+            _database.AddOutParameter(
+                dbCommand,
+                "@Out_ID",
+                System.Data.DbType.Int64,
+                sizeof(long));
+
+            await _database.ExecuteNonQueryAsync(dbCommand);
+
+            return Convert.ToInt64(
+                _database.GetParameterValue(
+                    dbCommand,
+                    "@Out_ID"));
+        }
+
+        public async Task<UpdateCommissionDistributionSetupResponse?>
+        UpdateCommissionDistributionSetup(
+            UpdateCommissionDistributionSetupRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            UpdateCommissionDistributionSetupResponse? response = null;
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[CONFG].[CommissionDistributionSetup_Update]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@DistributionId",
+                request.DistributionId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@AgencyId",
+                request.AgencyId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@ServiceId",
+                request.ServiceId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@PlanId",
+                request.PlanId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@CalculationTypeId",
+                request.CalculationTypeId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@AgancyValue",
+                request.AgancyValue);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@OrgValue",
+                request.OrgValue);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@MdsValue",
+                request.MdsValue);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@DSValue",
+                request.DSValue);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@AgentValue",
+                request.AgentValue);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@Status",
+                request.Status);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@UpdatedBy",
+                serviceUser.UserMasterID);
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(dbCommand))
+            {
+                if (dataReader.Read())
+                {
+                    response =
+                        new UpdateCommissionDistributionSetupResponse
+                        {
+                            DistributionId =
+                                GetInt64Value(
+                                    dataReader,
+                                    "DistributionId") ?? 0,
+
+                            IsUpdated =
+                                dataReader["IsUpdated"] != DBNull.Value &&
+                                Convert.ToBoolean(
+                                    dataReader["IsUpdated"]),
+
+                            Message =
+                                GetStringValue(
+                                    dataReader,
+                                    "Message")
+                        };
+                }
+            }
+
+            return response;
+        }
+        public async Task<DeleteCommissionDistributionSetupResponse?>
+    DeleteCommissionDistributionSetup(
+        long distributionId,
+        IFINOVAServiceUser serviceUser)
+        {
+            DeleteCommissionDistributionSetupResponse? response = null;
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[CONFG].[CommissionDistributionSetup_Delete]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@DistributionId",
+                distributionId);
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(dbCommand))
+            {
+                if (dataReader.Read())
+                {
+                    response =
+                        new DeleteCommissionDistributionSetupResponse
+                        {
+                            DistributionId =
+                                GetInt64Value(
+                                    dataReader,
+                                    "DistributionId") ?? 0,
+
+                            IsDeleted =
+                                dataReader["IsDeleted"] != DBNull.Value &&
+                                Convert.ToBoolean(
+                                    dataReader["IsDeleted"]),
+
+                            Message =
+                                GetStringValue(
+                                    dataReader,
+                                    "Message")
+                        };
+                }
+            }
+
+            return response;
+        }
+        public async Task<GetCommissionDistributionSetupResponse?>
+    GetCommissionDistributionSetupByID(
+        long distributionId,
+        IFINOVAServiceUser serviceUser)
+        {
+            GetCommissionDistributionSetupResponse? response = null;
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[CONFG].[CommissionDistributionSetup_GetByID]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@DistributionId",
+                distributionId);
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(dbCommand))
+            {
+                if (dataReader.Read())
+                {
+                    response =
+                        MapCommissionDistributionSetup(
+                            dataReader);
+                }
+            }
+
+            return response;
+        }
+        public async Task<List<GetCommissionDistributionSetupResponse>>
+    GetCommissionDistributionSetups(
+        GetCommissionDistributionSetupRequest request,
+        IFINOVAServiceUser serviceUser)
+        {
+            List<GetCommissionDistributionSetupResponse> response =
+                new List<GetCommissionDistributionSetupResponse>();
+
+            var dbCommand =
+                _database.GetStoredProcCommand(
+                    "[CONFG].[CommissionDistributionSetup_GetAll]");
+
+            _database.AddInParameter(
+                dbCommand,
+                "@AgencyId",
+                request.AgencyId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@ServiceId",
+                request.ServiceId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@PlanId",
+                request.PlanId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@CalculationTypeId",
+                request.CalculationTypeId);
+
+            using (var dataReader =
+                   await _database.ExecuteReaderAsync(dbCommand))
+            {
+                while (dataReader.Read())
+                {
+                    response.Add(
+                        MapCommissionDistributionSetup(
+                            dataReader));
+                }
+            }
+
+            return response;
+        }
+        private GetCommissionDistributionSetupResponse
+      MapCommissionDistributionSetup(
+          System.Data.IDataReader dataReader)
+        {
+            GetCommissionDistributionSetupResponse row =
+                new GetCommissionDistributionSetupResponse();
+
+            row.DistributionId =
+                GetInt64Value(dataReader, "DistributionId") ?? 0;
+
+            // Agency
+            row.AgencyId =
+                GetInt32Value(dataReader, "AgencyId") ?? 0;
+
+            row.AgencyName =
+                GetStringValue(dataReader, "AgencyName");
+
+            // Service
+            row.ServiceId =
+                GetInt32Value(dataReader, "ServiceId") ?? 0;
+
+            row.ServiceName =
+                GetStringValue(dataReader, "ServiceName");
+
+            // Plan
+            row.PlanId =
+                GetInt32Value(dataReader, "PlanId") ?? 0;
+
+            row.PlanName =
+                GetStringValue(dataReader, "PlanName");
+
+            // Calculation Type
+            row.CalculationTypeId =
+                GetInt32Value(dataReader, "CalculationTypeId") ?? 0;
+
+            row.CalculationTypeName =
+                GetStringValue(dataReader, "CalculationTypeName");
+
+            // Commission Values
+            row.AgancyValue =
+                dataReader["AgancyValue"] == DBNull.Value
+                    ? 0
+                    : Convert.ToDecimal(dataReader["AgancyValue"]);
+
+            row.OrgValue =
+                dataReader["OrgValue"] == DBNull.Value
+                    ? 0
+                    : Convert.ToDecimal(dataReader["OrgValue"]);
+
+            row.MdsValue =
+                dataReader["MdsValue"] == DBNull.Value
+                    ? 0
+                    : Convert.ToDecimal(dataReader["MdsValue"]);
+
+            row.DSValue =
+                dataReader["DSValue"] == DBNull.Value
+                    ? 0
+                    : Convert.ToDecimal(dataReader["DSValue"]);
+
+            row.AgentValue =
+                dataReader["AgentValue"] == DBNull.Value
+                    ? 0
+                    : Convert.ToDecimal(dataReader["AgentValue"]);
+
+            // Status
+            row.Status =
+                GetInt32Value(dataReader, "Status") ?? 0;
+
+            row.StatusName =
+                GetStringValue(dataReader, "StatusName");
+
+            // Created
+            row.CreatedOn =
+                dataReader["CreatedOn"] == DBNull.Value
+                    ? (DateTime?)null
+                    : Convert.ToDateTime(dataReader["CreatedOn"]);
+
+            row.CreatedBy =
+                GetInt64Value(dataReader, "CreatedBy") ?? 0;
+
+            row.CreatedByName =
+                GetStringValue(dataReader, "CreatedByName");
+
+            // Updated
+            row.UpdatedOn =
+                dataReader["UpdatedOn"] == DBNull.Value
+                    ? (DateTime?)null
+                    : Convert.ToDateTime(dataReader["UpdatedOn"]);
+
+            row.UpdatedBy =
+                GetInt64Value(dataReader, "UpdatedBy");
+
+            row.UpdatedByName =
+                GetStringValue(dataReader, "UpdatedByName");
 
             return row;
         }

@@ -244,4 +244,102 @@ namespace FINOVA.DataModel.UserMgr
         public DateTimeOffset? UpdatedOn { get; set; }
         public long? UpdatedBy { get; set; }
     }
+    public class GetUserWalletResponse
+    {
+        public long UserDetailId { get; set; }
+
+        public long? UserMasterId { get; set; }
+        public string? UserName { get; set; }
+
+        public decimal AvailableLimit { get; set; }
+        public decimal ThresoldLimit { get; set; }
+        public string? RemarkReason { get; set; }
+
+        public int Status { get; set; }
+        public string? StatusName { get; set; }
+
+        public DateTime? CreatedOn { get; set; }
+        public long CreatedBy { get; set; }
+        public string? CreatedByName { get; set; }
+
+        public DateTime? UpdatedOn { get; set; }
+        public long? UpdatedBy { get; set; }
+        public string? UpdatedByName { get; set; }
+    }
+
+    public class UpdateUserWalletResponse
+    {
+        public long UserDetailId { get; set; }
+        public bool IsUpdated { get; set; }
+        public string? Message { get; set; }
+    }
+
+    public class DeleteUserWalletResponse
+    {
+        public long UserDetailId { get; set; }
+        public bool IsDeleted { get; set; }
+        public string? Message { get; set; }
+    }
+    public class UpdateUserWalletThresoldLimitResponse
+    {
+        public long UserDetailId { get; set; }
+
+        public long UserMasterId { get; set; }
+
+        public decimal AvailableLimit { get; set; }
+
+        public decimal ThresoldLimit { get; set; }
+
+        public DateTime? ThresoldOn { get; set; }
+
+        public long? ThresoldBy { get; set; }
+
+        public string? ThresoldReason { get; set; }
+
+        public bool IsUpdated { get; set; }
+
+        public string? Message { get; set; }
+    }
+    public class GetThresoldUserListResponse
+    {
+        public long UserMasterID { get; set; }
+
+        public long? ParentId { get; set; }
+        public int? UserTypeId { get; set; }
+        public int OrganizationID { get; set; }
+
+        public string? UserName { get; set; }
+
+        public string? Title { get; set; }
+        public string? FirstName { get; set; }
+        public string? MiddleName { get; set; }
+        public string? LastName { get; set; }
+
+        public string? FullName { get; set; }
+        public string? DisplayName { get; set; }
+
+        public string? EmailId { get; set; }
+        public string? MobileNo { get; set; }
+
+        public int UserStatus { get; set; }
+        public string? UserStatusName { get; set; }
+
+        // Wallet
+        public long? UserDetailId { get; set; }
+
+        public decimal AvailableLimit { get; set; }
+        public decimal ThresoldLimit { get; set; }
+
+        public DateTime? ThresoldOn { get; set; }
+        public long? ThresoldBy { get; set; }
+        public string? ThresoldReason { get; set; }
+
+        public int? WalletStatus { get; set; }
+        public string? WalletStatusName { get; set; }
+        public string? UserTypeName { get; set; }
+
+        // Threshold changed by
+        public string? ThresoldByUserName { get; set; }
+        public string? ThresoldByName { get; set; }
+    }
 }
