@@ -1,5 +1,6 @@
 ﻿using FINOVA.API.Common;
 using FINOVA.API.Security;
+using FINOVA.DataModel.Interfaces;
 using FINOVA.DataModel.Shared;
 using FINOVA.DataModel.Transactions;
 using FINOVA.Provider;
@@ -60,6 +61,35 @@ namespace FINOVA.API.Controllers
                     request,
                     CallerUser);
 
+            return Json(response);
+        }
+        // ============================================================
+        // UPDATE TRANSACTION STATUS
+        // ============================================================
+        [HttpPost]
+        [Route("UpdateTransactionStatus")]
+        public async Task<IActionResult> UpdateTransactionStatus(
+            [FromBody] UpdateTransactionStatusRequest request)
+        {
+            // ========================================================
+            // AUTHENTICATE AND AUTHORIZE USER
+            // ========================================================
+            ErrorResponse error =
+                 await _callValidator.AuthenticateAndAuthorize(
+                     CallerUser,
+                     true);
+
+            // ========================================================
+            // CALL PROVIDER
+            // ========================================================
+            SimpleResponse response =
+                await _Provider.UpdateTransactionStatus(
+                    request,
+                    CallerUser);
+
+            // ========================================================
+            // RETURN RESPONSE
+            // ========================================================
             return Json(response);
         }
     }

@@ -108,5 +108,64 @@ namespace FINOVA.Provider
 
             return response;
         }
+        // ============================================================
+        // UPDATE TRANSACTION STATUS
+        // ============================================================
+        public async Task<SimpleResponse> UpdateTransactionStatus(
+            UpdateTransactionStatusRequest request,
+            IFINOVAServiceUser serviceUser)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            // ========================================================
+            // VALIDATION
+            // ========================================================
+
+            if (request == null)
+            {
+                response.SetError("Invalid Request");
+                return response;
+            }
+
+            if (request.TransactionId <= 0)
+            {
+                response.SetError("Valid TransactionId is required.");
+                return response;
+            }
+
+            if (request.Status <= 0)
+            {
+                response.SetError("Valid transaction status is required.");
+                return response;
+            }
+
+            // ========================================================
+            // CALL REPOSITORY
+            // ========================================================
+
+            var result =
+                await _repository.UpdateTransactionStatus(
+                    request,
+                    serviceUser);
+
+            // ========================================================
+            // VALIDATE RESULT
+            // ========================================================
+
+            if (result == null)
+            {
+                response.SetError("Unable to update transaction status.");
+
+                return response;
+            }
+
+            // ========================================================
+            // SUCCESS RESPONSE
+            // ========================================================
+
+            response.Result = result;
+
+            return response;
+        }
     }
 }
