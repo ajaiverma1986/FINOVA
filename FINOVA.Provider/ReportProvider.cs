@@ -647,5 +647,60 @@ namespace FINOVA.Provider
 
             return response;
         }
+        // ============================================================
+        // GET USER LEDGER REPORT
+        // ============================================================
+        public async Task<SimpleResponse> GetUserLedgerReport(
+            GetUserLedgerReportRequest request)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            // ========================================================
+            // VALIDATE REQUEST
+            // ========================================================
+
+            if (request == null)
+            {
+                response.SetError("Invalid request.");
+                return response;
+            }
+
+            // Validate UserMasterId
+            if (request.UserMasterId <= 0)
+            {
+                response.SetError("Valid UserMasterId is required.");
+                return response;
+            }
+
+            // Validate FromDate and ToDate
+            if (request.FromDate == default(DateTime) ||
+                request.ToDate == default(DateTime))
+            {
+                response.SetError("FromDate and ToDate are required.");
+                return response;
+            }
+
+            // Validate Date Range
+            if (request.FromDate.Date > request.ToDate.Date)
+            {
+                response.SetError("FromDate cannot be greater than ToDate.");
+                return response;
+            }
+
+            // ========================================================
+            // CALL REPOSITORY
+            // ========================================================
+
+            var result = await _repository.GetUserLedgerReport(
+                request);
+
+            // ========================================================
+            // SUCCESS RESPONSE
+            // ========================================================
+
+            response.Result = result ?? new List<GetUserLedgerReportResponse>();
+
+            return response;
+        }
     }
 }

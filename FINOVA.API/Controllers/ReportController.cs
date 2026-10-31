@@ -1,5 +1,6 @@
 ﻿using FINOVA.API.Common;
 using FINOVA.API.Security;
+using FINOVA.DataModel.Interfaces;
 using FINOVA.DataModel.Report;
 using FINOVA.DataModel.Shared;
 using FINOVA.Provider;
@@ -143,6 +144,33 @@ namespace FINOVA.API.Controllers
                     request,
                     CallerUser);
 
+            return Json(response);
+        }
+        // ============================================================
+        // GET USER LEDGER REPORT
+        // ============================================================
+        [HttpPost]
+        [Route("GetUserLedgerReport")]
+        public async Task<IActionResult> GetUserLedgerReport(
+            [FromBody] GetUserLedgerReportRequest request)
+        {
+            SimpleResponse response=new SimpleResponse ();
+            // Authenticate and authorize user
+            ErrorResponse error =
+               await _callValidator.AuthenticateAndAuthorize(
+                   CallerUser,
+                   true);
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            // Call Provider
+             response =
+                await _Provider.GetUserLedgerReport(request);
+
+            // Return Response
             return Json(response);
         }
     }

@@ -487,4 +487,29 @@ namespace FINOVA.DataModel.Report
 
         public int TotalPages { get; set; }
     }
+    public class GetUserLedgerReportResponse
+    {
+        public long LedgerId { get; set; }
+        public long UserMasterId { get; set; }
+
+        // User Details
+        public string? UserName { get; set; }
+
+        // Ledger Details
+        public DateTime LedgerDate { get; set; }
+
+        public int LedgerTypeId { get; set; }
+        public string? LedgerTypeName { get; set; }
+
+        public string? Naration { get; set; }
+        public string? DbCr { get; set; }
+
+        // Financial Details
+        public decimal DebitAmount { get; set; }
+        public decimal CreditAmount { get; set; }
+        public decimal Balance { get; set; }
+
+        public long? ReferenceId { get; set; }
+        public string? Remarks { get; set; }
+    }
 }

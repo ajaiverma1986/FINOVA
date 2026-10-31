@@ -113,4 +113,10 @@ namespace FINOVA.DataModel.Report
         public string SortColumn { get; set; } = "CreatedOn";
         public string SortDirection { get; set; } = "DESC";
     }
+    public class GetUserLedgerReportRequest
+    {
+        public DateTime FromDate { get; set; }
+        public DateTime ToDate { get; set; }
+        public long UserMasterId { get; set; }
+    }
 }

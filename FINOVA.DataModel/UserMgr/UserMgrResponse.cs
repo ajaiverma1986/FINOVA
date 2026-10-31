@@ -342,4 +342,9 @@ namespace FINOVA.DataModel.UserMgr
         public string? ThresoldByUserName { get; set; }
         public string? ThresoldByName { get; set; }
     }
+    public class GetParentCodeListResponse
+    {
+        public long UserMasterID { get; set; }
+        public string? UserName { get; set; }
+    }
 }

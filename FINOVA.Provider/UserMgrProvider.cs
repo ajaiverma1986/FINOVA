@@ -2443,5 +2443,60 @@ namespace FINOVA.Provider
 
             return response;
         }
+        // ============================================================
+        // GET PARENT CODE LIST
+        // ============================================================
+        public async Task<SimpleResponse> GetParentCodeList(
+            GetParentCodeListRequest request)
+        {
+            SimpleResponse response = new SimpleResponse();
+
+            // ========================================================
+            // VALIDATE REQUEST
+            // ========================================================
+
+            if (request == null)
+            {
+                
+                response.SetError("Invalid request.");
+                return response;
+            }
+
+            // Validate UserMasterId or UserName
+            if ((!request.UserMasterId.HasValue ||
+                 request.UserMasterId.Value <= 0) &&
+                string.IsNullOrWhiteSpace(request.UserName))
+            {
+                response.SetError("Either UserMasterId or UserName is required.");
+
+                return response;
+            }
+
+            // ========================================================
+            // CALL REPOSITORY
+            // ========================================================
+
+            var result = await _repository.GetParentCodeList(
+                request);
+
+            // ========================================================
+            // VALIDATE RESULT
+            // ========================================================
+
+            if (result == null || result.Count == 0)
+            {
+                response.SetError("Parent user details not found.");
+
+                return response;
+            }
+
+            // ========================================================
+            // SUCCESS RESPONSE
+            // ========================================================
+
+            response.Result = result;
+
+            return response;
+        }
     }
 }

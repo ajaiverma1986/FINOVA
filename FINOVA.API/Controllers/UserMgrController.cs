@@ -1,5 +1,6 @@
 ﻿using FINOVA.API.Common;
 using FINOVA.API.Security;
+using FINOVA.DataModel.Interfaces;
 using FINOVA.DataModel.Shared;
 using FINOVA.DataModel.UserMgr;
 using FINOVA.Provider;
@@ -2570,6 +2571,40 @@ namespace FINOVA.API.Controllers
                     request,
                     CallerUser);
 
+            return Json(response);
+        }
+        // ============================================================
+        // GET PARENT CODE LIST
+        // ============================================================
+        [HttpPost]
+        [Route("GetParentCodeList")]
+        public async Task<IActionResult> GetParentCodeList(
+            [FromBody] GetParentCodeListRequest request)
+        {
+            SimpleResponse response = new SimpleResponse();
+            // ========================================================
+            // AUTHENTICATE AND AUTHORIZE USER
+            // ========================================================
+            ErrorResponse error =
+                await _callValidator.AuthenticateAndAuthorize(
+                    CallerUser,
+                    true);
+
+            if (error.HasError)
+            {
+                response.SetError(error);
+                return Json(response);
+            }
+
+            // ========================================================
+            // CALL PROVIDER
+            // ========================================================
+             response =
+                await _Provider.GetParentCodeList(request);
+
+            // ========================================================
+            // RETURN RESPONSE
+            // ========================================================
             return Json(response);
         }
     }

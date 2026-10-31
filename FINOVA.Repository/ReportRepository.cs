@@ -2113,5 +2113,100 @@ namespace FINOVA.Repository
 
             return row;
         }
+        // ============================================================
+        // GET USER LEDGER REPORT
+        // ============================================================
+        public async Task<List<GetUserLedgerReportResponse>> GetUserLedgerReport(
+            GetUserLedgerReportRequest request)
+        {
+            List<GetUserLedgerReportResponse> response =
+                new List<GetUserLedgerReportResponse>();
+
+            // ========================================================
+            // STORED PROCEDURE
+            // ========================================================
+
+            var dbCommand = _database.GetStoredProcCommand(
+                "[TXN].[usp_GetUserLedgerReport]");
+
+            // ========================================================
+            // INPUT PARAMETERS
+            // ========================================================
+
+            _database.AddInParameter(
+                dbCommand,
+                "@FromDate",
+                request.FromDate.Date);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@ToDate",
+                request.ToDate.Date);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@UserMasterId",
+                request.UserMasterId);
+
+            // ========================================================
+            // EXECUTE AND READ RESULT
+            // ========================================================
+
+            using (var dataReader =
+                await _database.ExecuteReaderAsync(dbCommand))
+            {
+                while (await dataReader.ReadAsync())
+                {
+                    response.Add(new GetUserLedgerReportResponse
+                    {
+                        LedgerId = GetInt64Value(
+                            dataReader, "LedgerId").Value,
+
+                        UserMasterId = GetInt64Value(
+                            dataReader, "UserMasterId").Value,
+
+                        // User Details
+                        UserName = GetStringValue(
+                            dataReader, "UserName"),
+
+                        // Ledger Details
+                        LedgerDate = GetDateTimeValue(
+                            dataReader, "LedgerDate").Value,
+
+                        LedgerTypeId = GetInt32Value(
+                            dataReader, "LedgerTypeId").Value,
+
+                        LedgerTypeName = GetStringValue(
+                            dataReader, "LedgerTypeName"),
+
+                        Naration = GetStringValue(
+                            dataReader, "Naration"),
+
+                        DbCr = GetStringValue(
+                            dataReader, "DbCr"),
+
+                        // Financial Details
+                        DebitAmount = GetDecimalValue(
+                            dataReader, "DebitAmount").Value,
+
+                        CreditAmount = GetDecimalValue(
+                            dataReader, "CreditAmount").Value,
+
+                        Balance = GetDecimalValue(
+                            dataReader, "Balance").Value,
+
+                        ReferenceId = dataReader.IsDBNull(
+                            dataReader.GetOrdinal("ReferenceId"))
+                                ? null
+                                : GetInt64Value(dataReader, "ReferenceId"),
+
+                        Remarks = GetStringValue(
+                            dataReader, "Remarks")
+                    });
+                }
+            }
+
+            return response;
+        }
     }
 }

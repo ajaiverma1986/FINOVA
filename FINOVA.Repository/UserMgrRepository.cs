@@ -4047,5 +4047,54 @@ namespace FINOVA.Repository
 
             return row;
         }
+        // ============================================================
+        // GET PARENT CODE LIST
+        // ============================================================
+        public async Task<List<GetParentCodeListResponse>> GetParentCodeList(
+            GetParentCodeListRequest request)
+        {
+            List<GetParentCodeListResponse> response =
+                new List<GetParentCodeListResponse>();
+
+            // ========================================================
+            // STORED PROCEDURE
+            // ========================================================
+            var dbCommand = _database.GetStoredProcCommand(
+                "[USR].[usp_getParentCodelist]");
+
+            // ========================================================
+            // INPUT PARAMETERS
+            // ========================================================
+            _database.AddInParameter(
+                dbCommand,
+                "@UserMasterId",
+                request.UserMasterId);
+
+            _database.AddInParameter(
+                dbCommand,
+                "@UserName",
+                request.UserName);
+
+            // ========================================================
+            // EXECUTE AND READ RESULT
+            // ========================================================
+            using (var dataReader =
+                await _database.ExecuteReaderAsync(dbCommand))
+            {
+                while (await dataReader.ReadAsync())
+                {
+                    response.Add(new GetParentCodeListResponse
+                    {
+                        UserMasterID = GetInt64Value(dataReader, "UserMasterID").Value,
+
+                        UserName = GetStringValue(
+                            dataReader,
+                            "UserName")
+                    });
+                }
+            }
+
+            return response;
+        }
     }
 }

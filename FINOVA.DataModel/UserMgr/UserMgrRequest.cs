@@ -415,4 +415,9 @@ namespace FINOVA.DataModel.UserMgr
         public int? Status { get; set; }
         public string? SearchText { get; set; }
     }
+    public class GetParentCodeListRequest
+    {
+        public long? UserMasterId { get; set; }
+        public string? UserName { get; set; }
+    }
 }
